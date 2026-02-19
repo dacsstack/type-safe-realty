@@ -16,7 +16,7 @@ export default function Login({ setToken }) {
 
     try {
       const res = await fetch(
-        "https://import.meta.env.VITE_API_URL/api/login",
+        "https://forthubapi-production.up.railway.app/api/login",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
