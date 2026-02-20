@@ -16,7 +16,7 @@ export default function Login({ setToken }) {
 
     try {
       const res = await fetch(
-        "http://forthub-backendapi-production.up.railway.app/api/login",
+        "https://forthub-backendapi-production.up.railway.app/api/login",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
