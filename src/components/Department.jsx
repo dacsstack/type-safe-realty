@@ -1,5 +1,5 @@
 import { Component } from "react";
-import variables from "../Variables.jsx";
+import { variables } from "../Variables.jsx";
 
 export default class Department extends Component {
   constructor(props) {
