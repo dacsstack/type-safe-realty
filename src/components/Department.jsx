@@ -61,6 +61,7 @@ export default class Department extends Component {
   refreshList() {
     fetch(variables.VITE_API_URL + "department", {
       method: "GET",
+      credentials: "include", // <-- for CORS cookies
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
