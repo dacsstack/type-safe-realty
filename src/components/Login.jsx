@@ -15,14 +15,11 @@ export default function Login({ setToken }) {
     setLoading(true);
 
     try {
-      const res = await fetch(
-        "https://forthub-backendapi-production.up.railway.app/api/login",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, password }),
-        },
-      );
+      const res = await fetch("https://mysql.railway.internal:3306/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
 
       const data = await res.json();
 
