@@ -4,107 +4,101 @@ import { variables } from "../Variables.jsx";
 export default class Department extends Component {
   constructor(props) {
     super(props);
-
     this.state = {
       departments: [],
+      departmentsWithoutFilter: [],
       modalTitle: "",
       DepartmentName: "",
       DepartmentId: 0,
-
       DepartmentIdFilter: "",
       DepartmentNameFilter: "",
-      departmentsWithoutFilter: [],
     };
   }
 
+  // =====================
+  // FILTER & SORT
+  // =====================
   FilterFn() {
-    var DepartmentIdFilter = this.state.DepartmentIdFilter;
-    var DepartmentNameFilter = this.state.DepartmentNameFilter;
-
-    var filteredData = this.state.departmentsWithoutFilter.filter(
-      function (el) {
-        return (
-          el.DepartmentId.toString()
-            .toLowerCase()
-            .includes(DepartmentIdFilter.toString().trim().toLowerCase()) &&
-          el.DepartmentName.toString()
-            .toLowerCase()
-            .includes(DepartmentNameFilter.toString().trim().toLowerCase())
-        );
-      },
+    const {
+      DepartmentIdFilter,
+      DepartmentNameFilter,
+      departmentsWithoutFilter,
+    } = this.state;
+    const filtered = departmentsWithoutFilter.filter(
+      (el) =>
+        el.DepartmentId.toString()
+          .toLowerCase()
+          .includes(DepartmentIdFilter.toLowerCase().trim()) &&
+        el.DepartmentName.toLowerCase().includes(
+          DepartmentNameFilter.toLowerCase().trim(),
+        ),
     );
-
-    this.setState({ departments: filteredData });
+    this.setState({ departments: filtered });
   }
 
   sortResult(prop, asc) {
-    var sortedData = this.state.departmentsWithoutFilter.sort(function (a, b) {
-      if (asc) {
-        return a[prop] > b[prop] ? 1 : a[prop] < b[prop] ? -1 : 0;
-      } else {
-        return b[prop] > a[prop] ? 1 : b[prop] < a[prop] ? -1 : 0;
-      }
+    const sorted = [...this.state.departmentsWithoutFilter].sort((a, b) => {
+      if (asc) return a[prop] > b[prop] ? 1 : a[prop] < b[prop] ? -1 : 0;
+      else return b[prop] > a[prop] ? 1 : b[prop] < a[prop] ? -1 : 0;
     });
-
-    this.setState({ departments: sortedData });
+    this.setState({ departments: sorted });
   }
 
   changeDepartmentIdFilter = (e) => {
-    this.state.DepartmentIdFilter = e.target.value;
-    this.FilterFn();
+    this.setState({ DepartmentIdFilter: e.target.value }, () =>
+      this.FilterFn(),
+    );
   };
   changeDepartmentNameFilter = (e) => {
-    this.state.DepartmentNameFilter = e.target.value;
-    this.FilterFn();
+    this.setState({ DepartmentNameFilter: e.target.value }, () =>
+      this.FilterFn(),
+    );
   };
 
-  refreshList() {
-    fetch("Fetching from:", variables.API_URL + "department", {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
-    })
-      .then((response) => {
-        if (response.status === 401) {
-          alert("Session expired. Please login again.");
-          localStorage.removeItem("token");
-          window.location.href = "/login";
-          return;
-        }
-
-        if (!response.ok) {
-          throw new Error("HTTP error " + response.status);
-        }
-
-        return response.json();
-      })
-      .then((data) => {
-        if (Array.isArray(data)) {
-          this.setState({
-            departments: data,
-            departmentsWithoutFilter: data,
-          });
-        } else {
-          console.error("Invalid data format:", data);
-          this.setState({ departments: [] });
-        }
-      })
-      .catch((error) => {
-        console.error("Fetch failed:", error);
-        this.setState({ departments: [] });
+  // =====================
+  // FETCH DEPARTMENTS
+  // =====================
+  async refreshList() {
+    try {
+      const res = await fetch(variables.API_URL + "department", {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("token"),
+        },
       });
+
+      if (res.status === 401) {
+        alert("Session expired. Please login again.");
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+        return;
+      }
+
+      if (!res.ok) throw new Error("HTTP error " + res.status);
+
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        this.setState({ departments: data, departmentsWithoutFilter: data });
+      } else {
+        console.error("Invalid data format:", data);
+        this.setState({ departments: [] });
+      }
+    } catch (err) {
+      console.error("Fetch failed:", err);
+      this.setState({ departments: [] });
+    }
   }
 
   componentDidMount() {
     this.refreshList();
   }
 
-  changeDepartmentName = (e) => {
+  // =====================
+  // FORM CONTROL
+  // =====================
+  changeDepartmentName = (e) =>
     this.setState({ DepartmentName: e.target.value });
-  };
 
   addClick() {
     this.setState({
@@ -113,6 +107,7 @@ export default class Department extends Component {
       DepartmentName: "",
     });
   }
+
   editClick(dep) {
     this.setState({
       modalTitle: "Edit Developer",
@@ -121,78 +116,72 @@ export default class Department extends Component {
     });
   }
 
-  createClick() {
-    fetch(variables.API_URL + "department", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
-      body: JSON.stringify({
-        DepartmentName: this.state.DepartmentName,
-      }),
-    })
-      .then((res) => res.json())
-      .then(
-        (result) => {
-          alert(result);
-          this.refreshList();
+  // =====================
+  // CRUD ACTIONS
+  // =====================
+  async createClick() {
+    try {
+      const res = await fetch(variables.API_URL + "department", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("token"),
         },
-        (error) => {
-          alert("Failed");
-        },
-      );
+        body: JSON.stringify({ DepartmentName: this.state.DepartmentName }),
+      });
+      const result = await res.json();
+      alert(result.message);
+      this.refreshList();
+    } catch {
+      alert("Failed");
+    }
   }
 
-  updateClick() {
-    fetch(variables.API_URL + "department", {
-      method: "PUT",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
-      body: JSON.stringify({
-        DepartmentId: this.state.DepartmentId,
-        DepartmentName: this.state.DepartmentName,
-      }),
-    })
-      .then((res) => res.json())
-      .then(
-        (result) => {
-          alert(result);
-          this.refreshList();
+  async updateClick() {
+    try {
+      const res = await fetch(variables.API_URL + "department", {
+        method: "PUT",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("token"),
         },
-        (error) => {
-          alert("Failed");
-        },
-      );
+        body: JSON.stringify({
+          DepartmentId: this.state.DepartmentId,
+          DepartmentName: this.state.DepartmentName,
+        }),
+      });
+      const result = await res.json();
+      alert(result.message);
+      this.refreshList();
+    } catch {
+      alert("Failed");
+    }
   }
 
-  deleteClick(id) {
-    if (window.confirm("Are you sure?")) {
-      fetch(variables.API_URL + "department/" + id, {
+  async deleteClick(id) {
+    if (!window.confirm("Are you sure?")) return;
+    try {
+      const res = await fetch(variables.API_URL + "department/" + id, {
         method: "DELETE",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
           Authorization: "Bearer " + localStorage.getItem("token"),
         },
-      })
-        .then((res) => res.json())
-        .then(
-          (result) => {
-            alert(result);
-            this.refreshList();
-          },
-          (error) => {
-            alert("Failed");
-          },
-        );
+      });
+      const result = await res.json();
+      alert(result.message);
+      this.refreshList();
+    } catch {
+      alert("Failed");
     }
   }
 
+  // =====================
+  // RENDER
+  // =====================
   render() {
     const { departments, modalTitle, DepartmentId, DepartmentName } =
       this.state;
@@ -220,7 +209,6 @@ export default class Department extends Component {
                 <th className="px-6 py-3 text-center">Actions</th>
               </tr>
             </thead>
-
             <tbody className="divide-y">
               {departments.map((dep) => (
                 <tr key={dep.DepartmentId} className="hover:bg-gray-50">
@@ -233,7 +221,6 @@ export default class Department extends Component {
                     >
                       Edit
                     </button>
-
                     <button
                       onClick={() => this.deleteClick(dep.DepartmentId)}
                       className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md"
@@ -247,19 +234,16 @@ export default class Department extends Component {
           </table>
         </div>
 
-        {/* SIMPLE FORM (No Bootstrap Modal) */}
+        {/* SIMPLE FORM */}
         <div className="mt-6 bg-white p-6 rounded-xl shadow max-w-md">
           <h3 className="text-lg font-semibold mb-4">{modalTitle}</h3>
-
           <input
-            id="departmentName"
             type="text"
             placeholder="Developer Name"
             value={DepartmentName}
             onChange={this.changeDepartmentName}
             className="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-
           {DepartmentId === 0 ? (
             <button
               onClick={() => this.createClick()}
