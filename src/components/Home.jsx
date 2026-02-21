@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick-theme.css";
+import "slick-carousel/slick/slick.css";
 import { variables } from "../Variables.jsx";
 
 export default function Home() {
   const [projects, setProjects] = useState([]);
 
-  // Fetch projects/employees from backend
   const fetchProjects = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -32,13 +34,24 @@ export default function Home() {
     return <p className="text-center mt-10 text-gray-500">No projects found</p>;
   }
 
+  // Carousel settings
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 4000,
+    arrows: true,
+  };
+
   return (
     <div className="p-6">
       <h2 className="text-3xl font-bold mb-6 text-center">Our Projects</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {projects.map((proj) => {
-          // Handle multiple photos (comma-separated)
           const photos = proj.PhotoFileName
             ? proj.PhotoFileName.split(",")
             : [];
@@ -50,26 +63,23 @@ export default function Home() {
               className="bg-white rounded-xl shadow-lg overflow-hidden"
             >
               {/* Carousel */}
-              <div className="relative w-full h-48 overflow-hidden">
+              <div className="w-full h-64 overflow-hidden">
                 {photos.length > 1 ? (
-                  <div className="carousel relative w-full h-full">
+                  <Slider {...settings}>
                     {photos.map((photo, index) => (
                       <img
                         key={index}
                         src={variables.PHOTO_URL + photo}
-                        alt={`Project ${proj.EmployeeName} ${index}`}
-                        className={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-500 ${
-                          index === 0 ? "opacity-100" : "opacity-0"
-                        }`}
+                        alt={`Project ${proj.EmployeeName} ${index + 1}`}
+                        className="w-full h-64 object-cover rounded-t-xl"
                       />
                     ))}
-                    {/* Optional: Add navigation buttons for next/prev */}
-                  </div>
+                  </Slider>
                 ) : (
                   <img
                     src={variables.PHOTO_URL + mainPhoto}
                     alt={proj.EmployeeName}
-                    className="w-full h-full object-cover"
+                    className="w-full h-64 object-cover rounded-t-xl"
                   />
                 )}
               </div>
