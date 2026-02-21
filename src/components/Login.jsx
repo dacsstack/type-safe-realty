@@ -16,11 +16,7 @@ export default function Login({ setToken }) {
 
     try {
       const res = await fetch(
-<<<<<<< HEAD
         "https://forthub-backendapi-production.up.railway.app/api/login",
-=======
-        "http://forthub-backendapi-production.up.railway.app/api/login",
->>>>>>> badca22 (fix)
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
