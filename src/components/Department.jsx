@@ -61,13 +61,13 @@ export default class Department extends Component {
   refreshList() {
     fetch(variables.VITE_API_URL + "department", {
       method: "GET",
-      credentials: "include", // <-- for CORS cookies
       headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
         Authorization: "Bearer " + localStorage.getItem("token"),
       },
     })
+      .then((res) => res.text()) // instead of .json()
+      .then(console.log)
+      .catch(console.error)
       .then((response) => {
         if (response.status === 401) {
           alert("Session expired. Please login again.");
