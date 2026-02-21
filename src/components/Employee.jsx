@@ -15,10 +15,11 @@ export default class Employee extends Component {
       DateOfJoining: "",
       PhotoFileName:
         "office-center-company-buildings-icon-gray-vector-graphics_996135-51067.avif",
-      PhotoPath: variables.VITE_PHOTO_URL,
+      PhotoPath: variables.PHOTO_URL,
     };
   }
 
+  // TOKEN CHECK
   getToken() {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -29,6 +30,7 @@ export default class Employee extends Component {
     return token;
   }
 
+  // FETCH DATA
   refreshList() {
     const token = this.getToken();
     if (!token) return;
@@ -38,18 +40,13 @@ export default class Employee extends Component {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((response) => {
-        if (!response.ok) {
+        if (!response.ok)
           throw new Error("Employee fetch error: " + response.status);
-        }
         return response.json();
       })
       .then((data) => {
-        if (Array.isArray(data)) {
-          this.setState({ employees: data });
-        } else {
-          console.error("Employee not array:", data);
-          this.setState({ employees: [] });
-        }
+        if (Array.isArray(data)) this.setState({ employees: data });
+        else this.setState({ employees: [] });
       })
       .catch((error) => {
         console.error(error);
@@ -61,18 +58,13 @@ export default class Employee extends Component {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((response) => {
-        if (!response.ok) {
+        if (!response.ok)
           throw new Error("Department fetch error: " + response.status);
-        }
         return response.json();
       })
       .then((data) => {
-        if (Array.isArray(data)) {
-          this.setState({ departments: data });
-        } else {
-          console.error("Department not array:", data);
-          this.setState({ departments: [] });
-        }
+        if (Array.isArray(data)) this.setState({ departments: data });
+        else this.setState({ departments: [] });
       })
       .catch((error) => {
         console.error(error);
@@ -84,13 +76,14 @@ export default class Employee extends Component {
     this.refreshList();
   }
 
+  // FORM HANDLERS
   changeEmployeeName = (e) => this.setState({ EmployeeName: e.target.value });
   changeDepartment = (e) => this.setState({ Department: e.target.value });
   changeDateOfJoining = (e) => this.setState({ DateOfJoining: e.target.value });
 
   addClick() {
     this.setState({
-      modalTitle: "Add Project",
+      modalTitle: "Add Employee",
       EmployeeId: 0,
       EmployeeName: "",
       Department: "",
@@ -102,12 +95,14 @@ export default class Employee extends Component {
 
   editClick(emp) {
     this.setState({
-      modalTitle: "Edit Project",
+      modalTitle: "Edit Employee",
       EmployeeId: emp.EmployeeId,
       EmployeeName: emp.EmployeeName,
       Department: emp.Department,
       DateOfJoining: emp.DateOfJoining,
-      PhotoFileName: emp.PhotoFileName,
+      PhotoFileName:
+        emp.PhotoFileName ||
+        "office-center-company-buildings-icon-gray-vector-graphics_996135-51067.avif",
     });
   }
 
@@ -130,15 +125,11 @@ export default class Employee extends Component {
       }),
     })
       .then((res) => res.json())
-      .then(
-        (result) => {
-          alert(result);
-          this.refreshList();
-        },
-        (error) => {
-          alert("Failed");
-        },
-      );
+      .then((result) => {
+        alert(result.message);
+        this.refreshList();
+      })
+      .catch(() => alert("Failed"));
   }
 
   updateClick() {
@@ -161,15 +152,11 @@ export default class Employee extends Component {
       }),
     })
       .then((res) => res.json())
-      .then(
-        (result) => {
-          alert(result);
-          this.refreshList();
-        },
-        (error) => {
-          alert("Failed");
-        },
-      );
+      .then((result) => {
+        alert(result.message);
+        this.refreshList();
+      })
+      .catch(() => alert("Failed"));
   }
 
   deleteClick(id) {
@@ -182,18 +169,15 @@ export default class Employee extends Component {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then((res) => res.json())
-        .then(
-          (result) => {
-            alert(result);
-            this.refreshList();
-          },
-          (error) => {
-            alert("Failed");
-          },
-        );
+        .then((result) => {
+          alert(result.message);
+          this.refreshList();
+        })
+        .catch(() => alert("Failed"));
     }
   }
 
+  // FILE UPLOAD
   imageUpload = (e) => {
     e.preventDefault();
     const token = this.getToken();
@@ -209,8 +193,9 @@ export default class Employee extends Component {
     })
       .then((res) => res.json())
       .then((data) => {
-        this.setState({ PhotoFileName: data });
-      });
+        this.setState({ PhotoFileName: data.fileName });
+      })
+      .catch((err) => console.error("File upload error:", err));
   };
 
   render() {
@@ -230,12 +215,12 @@ export default class Employee extends Component {
       <div className="p-6">
         {/* HEADER */}
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Projects</h2>
+          <h2 className="text-2xl font-bold">Employees</h2>
           <button
             onClick={() => this.addClick()}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow"
           >
-            + Add Project
+            + Add Employee
           </button>
         </div>
 
@@ -245,9 +230,9 @@ export default class Employee extends Component {
             <thead className="bg-gray-100 uppercase text-xs text-gray-600">
               <tr>
                 <th className="px-6 py-3">ID</th>
-                <th className="px-6 py-3">Project Name</th>
-                <th className="px-6 py-3">Developer</th>
-                <th className="px-6 py-3">DOL</th>
+                <th className="px-6 py-3">Employee Name</th>
+                <th className="px-6 py-3">Department</th>
+                <th className="px-6 py-3">Date Of Joining</th>
                 <th className="px-6 py-3 text-center">Actions</th>
               </tr>
             </thead>
@@ -265,7 +250,6 @@ export default class Employee extends Component {
                     >
                       Edit
                     </button>
-
                     <button
                       onClick={() => this.deleteClick(emp.EmployeeId)}
                       className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md"
@@ -279,14 +263,14 @@ export default class Employee extends Component {
           </table>
         </div>
 
-        {/* FORM SECTION */}
+        {/* FORM */}
         <div className="bg-white p-6 rounded-xl shadow max-w-4xl">
           <h3 className="text-lg font-semibold mb-6">{modalTitle}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* LEFT SIDE */}
+            {/* LEFT */}
             <div>
               <label className="block text-sm font-medium mb-1">
-                Project Name
+                Employee Name
               </label>
               <input
                 type="text"
@@ -296,14 +280,14 @@ export default class Employee extends Component {
               />
 
               <label className="block text-sm font-medium mb-1">
-                Developer
+                Department
               </label>
               <select
                 onChange={this.changeDepartment}
                 value={Department}
                 className="w-full border rounded-lg p-2 mb-4 focus:ring-2 focus:ring-blue-500 outline-none"
               >
-                <option value="">Select Developers</option>
+                <option value="">Select Department</option>
                 {departments.map((dep) => (
                   <option key={dep.DepartmentId} value={dep.DepartmentName}>
                     {dep.DepartmentName}
@@ -312,7 +296,7 @@ export default class Employee extends Component {
               </select>
 
               <label className="block text-sm font-medium mb-1">
-                Date of Listing
+                Date Of Joining
               </label>
               <input
                 type="date"
@@ -322,14 +306,17 @@ export default class Employee extends Component {
               />
             </div>
 
-            {/* RIGHT SIDE */}
+            {/* RIGHT */}
             <div className="flex flex-col items-center">
               <img
                 className="w-52 h-52 object-cover rounded-lg shadow mb-4"
-                src={PhotoPath + PhotoFileName}
+                src={`${PhotoPath}${PhotoFileName}`}
                 alt="Employee"
+                onError={(e) => {
+                  e.target.src =
+                    "https://via.placeholder.com/200x200.png?text=No+Photo";
+                }}
               />
-
               <input
                 type="file"
                 onChange={this.imageUpload}
