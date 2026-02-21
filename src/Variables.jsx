@@ -11,8 +11,13 @@
 // //     : "http://localhost:5000";
 // // export const API_URL = `${BASE}/api`;
 // // export const PHOTO_URL = `${BASE}/Photos`;
+// export const variables = {
+//   VITE_API_URL: import.meta.env.VITE_API_URL || "http://localhost:5000/api/",
+//   VITE_PHOTO_URL:
+//     import.meta.env.VITE_PHOTO_URL || "http://localhost:5000/Photos/",
+// };
 export const variables = {
-  VITE_API_URL: import.meta.env.VITE_API_URL || "http://localhost:5000/api/",
+  VITE_API_URL: "https://forthub-backendapi-production.up.railway.app/api/",
   VITE_PHOTO_URL:
-    import.meta.env.VITE_PHOTO_URL || "http://localhost:5000/Photos/",
+    "https://forthub-backendapi-production.up.railway.app/Photos/",
 };
