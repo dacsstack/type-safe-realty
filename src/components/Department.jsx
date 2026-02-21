@@ -252,6 +252,7 @@ export default class Department extends Component {
           <h3 className="text-lg font-semibold mb-4">{modalTitle}</h3>
 
           <input
+            id="departmentName"
             type="text"
             placeholder="Developer Name"
             value={DepartmentName}
