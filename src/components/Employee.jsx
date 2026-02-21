@@ -13,7 +13,7 @@ export default class Employee extends Component {
       EmployeeName: "",
       Department: "",
       DateOfJoining: "",
-      PhotoFileName: [], // array for multiple images
+      PhotoFileName: [], // array para sa multiple images
       PhotoPath: variables.PHOTO_URL,
     };
   }
@@ -42,7 +42,8 @@ export default class Employee extends Component {
         return response.json();
       })
       .then((data) => {
-        this.setState({ employees: Array.isArray(data) ? data : [] });
+        if (Array.isArray(data)) this.setState({ employees: data });
+        else this.setState({ employees: [] });
       })
       .catch((error) => {
         console.error(error);
@@ -59,7 +60,8 @@ export default class Employee extends Component {
         return response.json();
       })
       .then((data) => {
-        this.setState({ departments: Array.isArray(data) ? data : [] });
+        if (Array.isArray(data)) this.setState({ departments: data });
+        else this.setState({ departments: [] });
       })
       .catch((error) => {
         console.error(error);
@@ -75,6 +77,9 @@ export default class Employee extends Component {
   changeDepartment = (e) => this.setState({ Department: e.target.value });
   changeDateOfJoining = (e) => this.setState({ DateOfJoining: e.target.value });
 
+  // =======================
+  // MODAL ACTIONS
+  // =======================
   addClick() {
     this.setState({
       modalTitle: "Add Employee",
@@ -88,9 +93,7 @@ export default class Employee extends Component {
 
   editClick(emp) {
     const photos = emp.PhotoFileName
-      ? Array.isArray(emp.PhotoFileName)
-        ? emp.PhotoFileName
-        : [emp.PhotoFileName]
+      ? emp.PhotoFileName.split(",") // convert comma-separated string to array
       : [];
     this.setState({
       modalTitle: "Edit Employee",
@@ -117,14 +120,17 @@ export default class Employee extends Component {
         EmployeeName: this.state.EmployeeName,
         Department: this.state.Department,
         DateOfJoining: this.state.DateOfJoining,
-        PhotoFileName: this.state.PhotoFileName,
+        PhotoFileName: this.state.PhotoFileName.join(","), // save as comma-separated string
       }),
     })
       .then((res) => res.json())
-      .then((result) => {
-        alert(result.message || result);
-        this.refreshList();
-      });
+      .then(
+        (result) => {
+          alert(result.message);
+          this.refreshList();
+        },
+        (error) => alert("Failed"),
+      );
   }
 
   updateClick() {
@@ -143,45 +149,49 @@ export default class Employee extends Component {
         EmployeeName: this.state.EmployeeName,
         Department: this.state.Department,
         DateOfJoining: this.state.DateOfJoining,
-        PhotoFileName: this.state.PhotoFileName,
+        PhotoFileName: this.state.PhotoFileName.join(","), // save as comma-separated string
       }),
     })
       .then((res) => res.json())
-      .then((result) => {
-        alert(result.message || result);
-        this.refreshList();
-      });
+      .then(
+        (result) => {
+          alert(result.message);
+          this.refreshList();
+        },
+        (error) => alert("Failed"),
+      );
   }
 
   deleteClick(id) {
     const token = this.getToken();
     if (!token) return;
+    if (!window.confirm("Are you sure?")) return;
 
-    if (window.confirm("Are you sure?")) {
-      fetch(variables.API_URL + "employee/" + id, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => res.json())
-        .then((result) => {
-          alert(result.message || result);
+    fetch(variables.API_URL + "employee/" + id, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then(
+        (result) => {
+          alert(result.message);
           this.refreshList();
-        });
-    }
+        },
+        (error) => alert("Failed"),
+      );
   }
 
+  // =======================
+  // IMAGE UPLOAD
+  // =======================
   imageUpload = (e) => {
     e.preventDefault();
     const token = this.getToken();
     if (!token) return;
 
-    const files = e.target.files;
-    if (!files.length) return;
-
+    const files = Array.from(e.target.files);
     const formData = new FormData();
-    for (let i = 0; i < files.length; i++) {
-      formData.append("file", files[i], files[i].name);
-    }
+    files.forEach((file) => formData.append("files", file, file.name));
 
     fetch(variables.API_URL + "employee/savefile", {
       method: "POST",
@@ -190,10 +200,10 @@ export default class Employee extends Component {
     })
       .then((res) => res.json())
       .then((data) => {
-        // merge uploaded files into state array
-        this.setState((prev) => ({
-          PhotoFileName: [...prev.PhotoFileName, ...data.fileNames],
-        }));
+        // merge newly uploaded files to existing PhotoFileName array
+        this.setState({
+          PhotoFileName: [...this.state.PhotoFileName, ...data.fileNames],
+        });
       });
   };
 
@@ -231,7 +241,7 @@ export default class Employee extends Component {
                 <th className="px-6 py-3">ID</th>
                 <th className="px-6 py-3">Name</th>
                 <th className="px-6 py-3">Department</th>
-                <th className="px-6 py-3">Date</th>
+                <th className="px-6 py-3">DOL</th>
                 <th className="px-6 py-3 text-center">Actions</th>
               </tr>
             </thead>
@@ -249,7 +259,6 @@ export default class Employee extends Component {
                     >
                       Edit
                     </button>
-
                     <button
                       onClick={() => this.deleteClick(emp.EmployeeId)}
                       className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md"
@@ -263,11 +272,11 @@ export default class Employee extends Component {
           </table>
         </div>
 
-        {/* FORM */}
+        {/* FORM SECTION */}
         <div className="bg-white p-6 rounded-xl shadow max-w-4xl">
           <h3 className="text-lg font-semibold mb-6">{modalTitle}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* LEFT */}
+            {/* LEFT SIDE */}
             <div>
               <label className="block text-sm font-medium mb-1">Name</label>
               <input
@@ -304,24 +313,31 @@ export default class Employee extends Component {
               />
             </div>
 
-            {/* RIGHT */}
+            {/* RIGHT SIDE */}
             <div className="flex flex-col items-center">
-              <div className="flex flex-wrap gap-2 mb-4">
-                {PhotoFileName.map((file, idx) => (
+              <div className="flex flex-wrap gap-4 mb-4">
+                {PhotoFileName.length > 0 ? (
+                  PhotoFileName.map((file, index) => (
+                    <img
+                      key={index}
+                      src={PhotoPath + file}
+                      alt={`Employee ${index + 1}`}
+                      className="w-40 h-40 object-cover rounded-lg shadow"
+                    />
+                  ))
+                ) : (
                   <img
-                    key={idx}
-                    src={PhotoPath + file}
-                    alt={`Employee ${idx}`}
-                    className="w-32 h-32 object-cover rounded-lg shadow"
+                    src={PhotoPath + "default-avatar.png"}
+                    alt="Employee"
+                    className="w-40 h-40 object-cover rounded-lg shadow"
                   />
-                ))}
+                )}
               </div>
-
               <input
                 type="file"
-                multiple
                 onChange={this.imageUpload}
                 className="border p-2 rounded-lg"
+                multiple // allow multiple file selection
               />
             </div>
           </div>
