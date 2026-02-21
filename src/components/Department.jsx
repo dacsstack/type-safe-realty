@@ -59,12 +59,15 @@ export default class Department extends Component {
   };
 
   refreshList() {
-    fetch(variables.VITE_API_URL + "department", {
-      method: "GET",
-      headers: {
-        Authorization: "Bearer " + localStorage.getItem("token"),
+    fetch(
+      "https://forthub-backendapi-production.up.railway.app/api/department",
+      {
+        method: "GET",
+        headers: {
+          Authorization: "Bearer " + localStorage.getItem("token"),
+        },
       },
-    })
+    )
       .then((res) => res.text()) // instead of .json()
       .then(console.log)
       .catch(console.error)
