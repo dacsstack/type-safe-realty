@@ -12,6 +12,6 @@
 // // export const API_URL = `${BASE}/api`;
 // // export const PHOTO_URL = `${BASE}/Photos`;
 export const variables = {
-  API_URL: import.meta.env.VITE_API_URL,
-  PHOTO_URL: import.meta.env.VITE_PHOTO_URL,
+  VITE_API_URL: import.meta.env.VITE_API_URL,
+  VITE_PHOTO_URL: import.meta.env.VITE_PHOTO_URL,
 };
