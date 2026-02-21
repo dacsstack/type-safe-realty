@@ -54,9 +54,8 @@ export default class Home extends Component {
               <div className="relative h-64">
                 {proj.photos.map((photo) => (
                   <img
-                    key={photo} // unique key per photo
-                    src={variables.PHOTO_URL + photo}
-                    alt={proj.EmployeeName + "-" + photo}
+                    src={variables.PHOTO_URL + proj.photos[0]}
+                    alt={proj.EmployeeName}
                     className="w-full h-full object-cover"
                   />
                 ))}
