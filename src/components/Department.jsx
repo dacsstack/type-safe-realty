@@ -1,5 +1,4 @@
 import { Component } from "react";
-import { variables } from "../Variables.jsx";
 
 export default class Department extends Component {
   constructor(props) {
@@ -126,17 +125,20 @@ export default class Department extends Component {
   }
 
   createClick() {
-    fetch(variables.VITE_API_URL + "department", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
+    fetch(
+      "https://forthub-backendapi-production.up.railway.app/api/department",
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("token"),
+        },
+        body: JSON.stringify({
+          DepartmentName: this.state.DepartmentName,
+        }),
       },
-      body: JSON.stringify({
-        DepartmentName: this.state.DepartmentName,
-      }),
-    })
+    )
       .then((res) => res.json())
       .then(
         (result) => {
@@ -150,18 +152,21 @@ export default class Department extends Component {
   }
 
   updateClick() {
-    fetch(variables.VITE_API_URL + "department", {
-      method: "PUT",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
+    fetch(
+      "https://forthub-backendapi-production.up.railway.app/api/department",
+      {
+        method: "PUT",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("token"),
+        },
+        body: JSON.stringify({
+          DepartmentId: this.state.DepartmentId,
+          DepartmentName: this.state.DepartmentName,
+        }),
       },
-      body: JSON.stringify({
-        DepartmentId: this.state.DepartmentId,
-        DepartmentName: this.state.DepartmentName,
-      }),
-    })
+    )
       .then((res) => res.json())
       .then(
         (result) => {
@@ -176,14 +181,18 @@ export default class Department extends Component {
 
   deleteClick(id) {
     if (window.confirm("Are you sure?")) {
-      fetch(variables.VITE_API_URL + "department/" + id, {
-        method: "DELETE",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token"),
+      fetch(
+        "https://forthub-backendapi-production.up.railway.app/api/department" +
+          id,
+        {
+          method: "DELETE",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
         },
-      })
+      )
         .then((res) => res.json())
         .then(
           (result) => {
