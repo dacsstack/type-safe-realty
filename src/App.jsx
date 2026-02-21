@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { BrowserRouter, NavLink, Route, Routes } from "react-router-dom";
 import Department from "./components/Department.jsx";
 import Employee from "./components/Employee.jsx";
@@ -7,13 +7,10 @@ import Login from "./components/Login.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
 
 function App() {
-  const [token, setToken] = useState(null);
+  // ✅ Initialize token from localStorage to persist across refresh
+  const [token, setToken] = useState(() => localStorage.getItem("token"));
 
-  useEffect(() => {
-    const storedToken = localStorage.getItem("token");
-    if (storedToken) setToken(storedToken);
-  }, []);
-
+  // Logout clears token and localStorage
   const handleLogout = () => {
     localStorage.removeItem("token");
     setToken(null);
@@ -85,9 +82,18 @@ function App() {
         <main className="flex-1 p-6">
           <div className="max-w-5xl mx-auto bg-white p-6 rounded-xl shadow-md">
             <Routes>
+              {/* PUBLIC ROUTE */}
               <Route path="/login" element={<Login setToken={setToken} />} />
-              <Route path="/" element={<Home />} />
 
+              {/* PROTECTED ROUTES */}
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute token={token}>
+                    <Home />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/department"
                 element={
@@ -96,7 +102,6 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-
               <Route
                 path="/employee"
                 element={
