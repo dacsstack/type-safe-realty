@@ -59,7 +59,6 @@ export default class Department extends Component {
   };
 
   refreshList() {
-    const API_URL = import.meta.env.VITE_API_URL || "/api/";
     fetch("Fetching from:", variables.API_URL + "department", {
       method: "GET",
       headers: {
