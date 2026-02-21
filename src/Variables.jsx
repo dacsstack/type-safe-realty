@@ -1,7 +1,7 @@
-export const variables = {
-  API_URL: "https://forthub-backendapi-production.up.railway.app/api/",
-  PHOTO_URL: "https://forthub-backendapi-production.up.railway.app/Photos/",
-};
+// export const variables = {
+//   API_URL: "https://forthub-backendapi-production.up.railway.app/api/",
+//   PHOTO_URL: "https://forthub-backendapi-production.up.railway.app/Photos/",
+// };
 // //   // API_URL: "https://forthubapi-production.up.railway.app/api/",
 // //   // PHOTO_URL: "https://forthubapi-production.up.railway.app/Photos/",
 // // };
@@ -11,7 +11,7 @@ export const variables = {
 // //     : "http://localhost:5000";
 // // export const API_URL = `${BASE}/api`;
 // // export const PHOTO_URL = `${BASE}/Photos`;
-// export const variables = {
-//   API_URL: import.meta.env.VITE_API_URL,
-//   PHOTO_URL: import.meta.env.VITE_PHOTO_URL,
-// };
+export const variables = {
+  API_URL: import.meta.env.VITE_API_URL,
+  PHOTO_URL: import.meta.env.VITE_PHOTO_URL,
+};
