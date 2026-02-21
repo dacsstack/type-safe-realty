@@ -59,7 +59,7 @@ export default class Department extends Component {
   };
 
   refreshList() {
-    fetch(variables.API_URL + "department", {
+    fetch(variables.VITE_API_URL + "department", {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -122,7 +122,7 @@ export default class Department extends Component {
   }
 
   createClick() {
-    fetch(variables.API_URL + "department", {
+    fetch(variables.VITE_API_URL + "department", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -146,7 +146,7 @@ export default class Department extends Component {
   }
 
   updateClick() {
-    fetch(variables.API_URL + "department", {
+    fetch(variables.VITE_API_URL + "department", {
       method: "PUT",
       headers: {
         Accept: "application/json",
@@ -172,7 +172,7 @@ export default class Department extends Component {
 
   deleteClick(id) {
     if (window.confirm("Are you sure?")) {
-      fetch(variables.API_URL + "department/" + id, {
+      fetch(variables.VITE_API_URL + "department/" + id, {
         method: "DELETE",
         headers: {
           Accept: "application/json",
