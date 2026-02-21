@@ -75,7 +75,7 @@ export default class Employee extends Component {
   // Modal actions
   addClick() {
     this.setState({
-      modalTitle: "Add Employee",
+      modalTitle: "Add Property",
       EmployeeId: 0,
       EmployeeName: "",
       Department: "",
@@ -92,7 +92,7 @@ export default class Employee extends Component {
       : [];
 
     this.setState({
-      modalTitle: "Edit Employee",
+      modalTitle: "Edit Property",
       EmployeeId: emp.EmployeeId,
       EmployeeName: emp.EmployeeName,
       Department: emp.Department,
@@ -235,12 +235,12 @@ export default class Employee extends Component {
       <div className="p-6">
         {/* HEADER */}
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Employees</h2>
+          <h2 className="text-2xl font-bold">Property</h2>
           <button
             onClick={() => this.addClick()}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow"
           >
-            + Add Employee
+            + Add Property
           </button>
         </div>
 
