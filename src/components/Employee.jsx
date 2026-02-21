@@ -137,6 +137,10 @@ export default class Employee extends Component {
     const token = this.getToken();
     if (!token) return;
 
+    const photos = Array.isArray(this.state.PhotoFileName)
+      ? this.state.PhotoFileName.join(",")
+      : this.state.PhotoFileName; // kung string na
+
     fetch(variables.API_URL + "employee", {
       method: "PUT",
       headers: {
@@ -149,7 +153,7 @@ export default class Employee extends Component {
         EmployeeName: this.state.EmployeeName,
         Department: this.state.Department,
         DateOfJoining: this.state.DateOfJoining,
-        PhotoFileName: this.state.PhotoFileName.join(","), // save as comma-separated string
+        PhotoFileName: photos,
       }),
     })
       .then((res) => res.json())
