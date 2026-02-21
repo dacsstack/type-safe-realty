@@ -15,7 +15,7 @@ export default class Employee extends Component {
       DateOfJoining: "",
       PhotoFileName:
         "office-center-company-buildings-icon-gray-vector-graphics_996135-51067.avif",
-      PhotoPath: variables.PHOTO_URL,
+      PhotoPath: variables.VITE_PHOTO_URL,
     };
   }
 
