@@ -13,13 +13,11 @@ export default class Employee extends Component {
       EmployeeName: "",
       Department: "",
       DateOfJoining: "",
-      PhotoFileName:
-        "office-center-company-buildings-icon-gray-vector-graphics_996135-51067.avif",
+      PhotoFileName: [], // multiple filenames as array
       PhotoPath: variables.PHOTO_URL,
     };
   }
 
-  // TOKEN CHECK
   getToken() {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -30,136 +28,92 @@ export default class Employee extends Component {
     return token;
   }
 
-  // FETCH DATA
   refreshList() {
     const token = this.getToken();
     if (!token) return;
 
-    // EMPLOYEES
+    // Employees
     fetch(variables.API_URL + "employee", {
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then((response) => {
-        if (!response.ok)
-          throw new Error("Employee fetch error: " + response.status);
-        return response.json();
-      })
-      .then((data) => {
-        if (Array.isArray(data)) this.setState({ employees: data });
-        else this.setState({ employees: [] });
-      })
-      .catch((error) => {
-        console.error(error);
-        this.setState({ employees: [] });
-      });
+      .then((res) => res.json())
+      .then((data) =>
+        this.setState({ employees: Array.isArray(data) ? data : [] }),
+      )
+      .catch(() => this.setState({ employees: [] }));
 
-    // DEPARTMENTS
+    // Departments
     fetch(variables.API_URL + "department", {
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then((response) => {
-        if (!response.ok)
-          throw new Error("Department fetch error: " + response.status);
-        return response.json();
-      })
-      .then((data) => {
-        if (Array.isArray(data)) this.setState({ departments: data });
-        else this.setState({ departments: [] });
-      })
-      .catch((error) => {
-        console.error(error);
-        this.setState({ departments: [] });
-      });
+      .then((res) => res.json())
+      .then((data) =>
+        this.setState({ departments: Array.isArray(data) ? data : [] }),
+      )
+      .catch(() => this.setState({ departments: [] }));
   }
 
   componentDidMount() {
     this.refreshList();
   }
 
-  // FORM HANDLERS
   changeEmployeeName = (e) => this.setState({ EmployeeName: e.target.value });
   changeDepartment = (e) => this.setState({ Department: e.target.value });
   changeDateOfJoining = (e) => this.setState({ DateOfJoining: e.target.value });
 
-  addClick() {
+  addClick = () =>
     this.setState({
       modalTitle: "Add Employee",
       EmployeeId: 0,
       EmployeeName: "",
       Department: "",
       DateOfJoining: "",
-      PhotoFileName:
-        "office-center-company-buildings-icon-gray-vector-graphics_996135-51067.avif",
+      PhotoFileName: [],
     });
-  }
 
-  editClick(emp) {
+  editClick = (emp) =>
     this.setState({
       modalTitle: "Edit Employee",
       EmployeeId: emp.EmployeeId,
       EmployeeName: emp.EmployeeName,
       Department: emp.Department,
       DateOfJoining: emp.DateOfJoining,
-      PhotoFileName:
-        emp.PhotoFileName ||
-        "office-center-company-buildings-icon-gray-vector-graphics_996135-51067.avif",
+      PhotoFileName: emp.PhotoFileName.split(","), // array
     });
-  }
 
-  createClick() {
+  createClick = () => {
     const token = this.getToken();
     if (!token) return;
 
     fetch(variables.API_URL + "employee", {
       method: "POST",
       headers: {
-        Accept: "application/json",
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({
-        EmployeeName: this.state.EmployeeName,
-        Department: this.state.Department,
-        DateOfJoining: this.state.DateOfJoining,
-        PhotoFileName: this.state.PhotoFileName,
-      }),
+      body: JSON.stringify(this.state),
     })
       .then((res) => res.json())
-      .then((result) => {
-        alert(result.message);
-        this.refreshList();
-      })
-      .catch(() => alert("Failed"));
-  }
+      .then(() => this.refreshList());
+  };
 
-  updateClick() {
+  updateClick = () => {
     const token = this.getToken();
     if (!token) return;
 
     fetch(variables.API_URL + "employee", {
       method: "PUT",
       headers: {
-        Accept: "application/json",
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({
-        EmployeeId: this.state.EmployeeId,
-        EmployeeName: this.state.EmployeeName,
-        Department: this.state.Department,
-        DateOfJoining: this.state.DateOfJoining,
-        PhotoFileName: this.state.PhotoFileName,
-      }),
+      body: JSON.stringify(this.state),
     })
       .then((res) => res.json())
-      .then((result) => {
-        alert(result.message);
-        this.refreshList();
-      })
-      .catch(() => alert("Failed"));
-  }
+      .then(() => this.refreshList());
+  };
 
-  deleteClick(id) {
+  deleteClick = (id) => {
     const token = this.getToken();
     if (!token) return;
 
@@ -169,22 +123,21 @@ export default class Employee extends Component {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then((res) => res.json())
-        .then((result) => {
-          alert(result.message);
-          this.refreshList();
-        })
-        .catch(() => alert("Failed"));
+        .then(() => this.refreshList());
     }
-  }
+  };
 
-  // FILE UPLOAD
   imageUpload = (e) => {
     e.preventDefault();
     const token = this.getToken();
     if (!token) return;
 
+    const files = e.target.files;
+    if (!files.length) return;
+
     const formData = new FormData();
-    formData.append("file", e.target.files[0], e.target.files[0].name);
+    for (let i = 0; i < files.length; i++)
+      formData.append("file", files[i], files[i].name);
 
     fetch(variables.API_URL + "employee/savefile", {
       method: "POST",
@@ -192,18 +145,14 @@ export default class Employee extends Component {
       body: formData,
     })
       .then((res) => res.json())
-      .then((data) => {
-        this.setState({ PhotoFileName: data.fileName });
-      })
-      .catch((err) => console.error("File upload error:", err));
+      .then((data) => this.setState({ PhotoFileName: data.fileNames })); // store array
   };
 
   render() {
     const {
-      departments,
       employees,
+      departments,
       modalTitle,
-      EmployeeId,
       EmployeeName,
       Department,
       DateOfJoining,
@@ -213,137 +162,47 @@ export default class Employee extends Component {
 
     return (
       <div className="p-6">
-        {/* HEADER */}
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Employees</h2>
-          <button
-            onClick={() => this.addClick()}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow"
-          >
-            + Add Employee
-          </button>
+        <h2 className="text-2xl font-bold mb-6">{modalTitle || "Employees"}</h2>
+
+        <input
+          type="file"
+          multiple
+          onChange={this.imageUpload}
+          className="border p-2 rounded-lg mb-4"
+        />
+
+        <div className="flex gap-2 mb-6">
+          {PhotoFileName.map((file, i) => (
+            <img
+              key={i}
+              src={`${PhotoPath}${file}`}
+              alt="Employee"
+              className="w-32 h-32 object-cover rounded-lg"
+            />
+          ))}
         </div>
 
         {/* TABLE */}
-        <div className="overflow-x-auto bg-white rounded-xl shadow mb-8">
-          <table className="min-w-full text-sm text-left">
-            <thead className="bg-gray-100 uppercase text-xs text-gray-600">
-              <tr>
-                <th className="px-6 py-3">ID</th>
-                <th className="px-6 py-3">Employee Name</th>
-                <th className="px-6 py-3">Department</th>
-                <th className="px-6 py-3">Date Of Joining</th>
-                <th className="px-6 py-3 text-center">Actions</th>
+        <table className="min-w-full border text-left">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Department</th>
+              <th>DOL</th>
+            </tr>
+          </thead>
+          <tbody>
+            {employees.map((emp) => (
+              <tr key={emp.EmployeeId}>
+                <td>{emp.EmployeeId}</td>
+                <td>{emp.EmployeeName}</td>
+                <td>{emp.Department}</td>
+                <td>{emp.DateOfJoining}</td>
               </tr>
-            </thead>
-            <tbody className="divide-y">
-              {employees.map((emp) => (
-                <tr key={emp.EmployeeId} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">{emp.EmployeeId}</td>
-                  <td className="px-6 py-4">{emp.EmployeeName}</td>
-                  <td className="px-6 py-4">{emp.Department}</td>
-                  <td className="px-6 py-4">{emp.DateOfJoining}</td>
-                  <td className="px-6 py-4 flex justify-center gap-2">
-                    <button
-                      onClick={() => this.editClick(emp)}
-                      className="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-md"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => this.deleteClick(emp.EmployeeId)}
-                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* FORM */}
-        <div className="bg-white p-6 rounded-xl shadow max-w-4xl">
-          <h3 className="text-lg font-semibold mb-6">{modalTitle}</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* LEFT */}
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Employee Name
-              </label>
-              <input
-                type="text"
-                value={EmployeeName}
-                onChange={this.changeEmployeeName}
-                className="w-full border rounded-lg p-2 mb-4 focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-
-              <label className="block text-sm font-medium mb-1">
-                Department
-              </label>
-              <select
-                onChange={this.changeDepartment}
-                value={Department}
-                className="w-full border rounded-lg p-2 mb-4 focus:ring-2 focus:ring-blue-500 outline-none"
-              >
-                <option value="">Select Department</option>
-                {departments.map((dep) => (
-                  <option key={dep.DepartmentId} value={dep.DepartmentName}>
-                    {dep.DepartmentName}
-                  </option>
-                ))}
-              </select>
-
-              <label className="block text-sm font-medium mb-1">
-                Date Of Joining
-              </label>
-              <input
-                type="date"
-                value={DateOfJoining}
-                onChange={this.changeDateOfJoining}
-                className="w-full border rounded-lg p-2 mb-4 focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-            </div>
-
-            {/* RIGHT */}
-            <div className="flex flex-col items-center">
-              <img
-                className="w-52 h-52 object-cover rounded-lg shadow mb-4"
-                src={`${PhotoPath}${PhotoFileName}`}
-                alt="Employee"
-                onError={(e) => {
-                  e.target.src =
-                    "https://via.placeholder.com/200x200.png?text=No+Photo";
-                }}
-              />
-              <input
-                type="file"
-                onChange={this.imageUpload}
-                className="border p-2 rounded-lg"
-              />
-            </div>
-          </div>
-
-          {/* BUTTON */}
-          <div className="mt-6">
-            {EmployeeId === 0 ? (
-              <button
-                onClick={() => this.createClick()}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
-              >
-                Create
-              </button>
-            ) : (
-              <button
-                onClick={() => this.updateClick()}
-                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg"
-              >
-                Update
-              </button>
-            )}
-          </div>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
     );
   }
