@@ -1,4 +1,5 @@
 import { Component } from "react";
+import { variables } from "../Variables1.jsx";
 
 export default class Department extends Component {
   constructor(props) {
@@ -58,18 +59,15 @@ export default class Department extends Component {
   };
 
   refreshList() {
-    fetch(
-      "https://forthub-backendapi-production.up.railway.app/api/department",
-      {
-        method: "GET",
-        credentials: "include", // <-- for CORS cookies
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token"),
-        },
+    fetch(variables.VITE_API_URL + "department", {
+      method: "GET",
+      credentials: "include", // <-- for CORS cookies
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
       },
-    )
+    })
       .then((response) => {
         if (response.status === 401) {
           alert("Session expired. Please login again.");
@@ -125,20 +123,17 @@ export default class Department extends Component {
   }
 
   createClick() {
-    fetch(
-      "https://forthub-backendapi-production.up.railway.app/api/department",
-      {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token"),
-        },
-        body: JSON.stringify({
-          DepartmentName: this.state.DepartmentName,
-        }),
+    fetch(variables.VITE_API_URL + "department", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
       },
-    )
+      body: JSON.stringify({
+        DepartmentName: this.state.DepartmentName,
+      }),
+    })
       .then((res) => res.json())
       .then(
         (result) => {
@@ -152,21 +147,18 @@ export default class Department extends Component {
   }
 
   updateClick() {
-    fetch(
-      "https://forthub-backendapi-production.up.railway.app/api/department",
-      {
-        method: "PUT",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token"),
-        },
-        body: JSON.stringify({
-          DepartmentId: this.state.DepartmentId,
-          DepartmentName: this.state.DepartmentName,
-        }),
+    fetch(variables.VITE_API_URL + "department", {
+      method: "PUT",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
       },
-    )
+      body: JSON.stringify({
+        DepartmentId: this.state.DepartmentId,
+        DepartmentName: this.state.DepartmentName,
+      }),
+    })
       .then((res) => res.json())
       .then(
         (result) => {
@@ -181,18 +173,14 @@ export default class Department extends Component {
 
   deleteClick(id) {
     if (window.confirm("Are you sure?")) {
-      fetch(
-        "https://forthub-backendapi-production.up.railway.app/api/department" +
-          id,
-        {
-          method: "DELETE",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + localStorage.getItem("token"),
-          },
+      fetch(variables.VITE_API_URL + "department/" + id, {
+        method: "DELETE",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("token"),
         },
-      )
+      })
         .then((res) => res.json())
         .then(
           (result) => {
