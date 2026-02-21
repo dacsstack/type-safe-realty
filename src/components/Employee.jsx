@@ -13,11 +13,12 @@ export default class Employee extends Component {
       EmployeeName: "",
       Department: "",
       DateOfJoining: "",
-      PhotoFileName: [], // array para sa multiple images
+      PhotoFileName: [], // always array
       PhotoPath: variables.PHOTO_URL,
     };
   }
 
+  // Get JWT token
   getToken() {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -28,58 +29,50 @@ export default class Employee extends Component {
     return token;
   }
 
+  // Fetch employees & departments
   refreshList() {
     const token = this.getToken();
     if (!token) return;
 
-    // EMPLOYEES
+    // Employees
     fetch(variables.API_URL + "employee", {
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then((response) => {
-        if (!response.ok)
-          throw new Error("Employee fetch error: " + response.status);
-        return response.json();
+      .then((res) => {
+        if (!res.ok) throw new Error("Employee fetch error: " + res.status);
+        return res.json();
       })
       .then((data) => {
         if (Array.isArray(data)) this.setState({ employees: data });
         else this.setState({ employees: [] });
       })
-      .catch((error) => {
-        console.error(error);
-        this.setState({ employees: [] });
-      });
+      .catch((err) => console.error(err));
 
-    // DEPARTMENTS
+    // Departments
     fetch(variables.API_URL + "department", {
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then((response) => {
-        if (!response.ok)
-          throw new Error("Department fetch error: " + response.status);
-        return response.json();
+      .then((res) => {
+        if (!res.ok) throw new Error("Department fetch error: " + res.status);
+        return res.json();
       })
       .then((data) => {
         if (Array.isArray(data)) this.setState({ departments: data });
         else this.setState({ departments: [] });
       })
-      .catch((error) => {
-        console.error(error);
-        this.setState({ departments: [] });
-      });
+      .catch((err) => console.error(err));
   }
 
   componentDidMount() {
     this.refreshList();
   }
 
+  // Form handlers
   changeEmployeeName = (e) => this.setState({ EmployeeName: e.target.value });
   changeDepartment = (e) => this.setState({ Department: e.target.value });
   changeDateOfJoining = (e) => this.setState({ DateOfJoining: e.target.value });
 
-  // =======================
-  // MODAL ACTIONS
-  // =======================
+  // Modal actions
   addClick() {
     this.setState({
       modalTitle: "Add Employee",
@@ -93,8 +86,11 @@ export default class Employee extends Component {
 
   editClick(emp) {
     const photos = emp.PhotoFileName
-      ? emp.PhotoFileName.split(",") // convert comma-separated string to array
+      ? typeof emp.PhotoFileName === "string"
+        ? emp.PhotoFileName.split(",")
+        : emp.PhotoFileName
       : [];
+
     this.setState({
       modalTitle: "Edit Employee",
       EmployeeId: emp.EmployeeId,
@@ -105,6 +101,7 @@ export default class Employee extends Component {
     });
   }
 
+  // Create Employee
   createClick() {
     const token = this.getToken();
     if (!token) return;
@@ -120,7 +117,7 @@ export default class Employee extends Component {
         EmployeeName: this.state.EmployeeName,
         Department: this.state.Department,
         DateOfJoining: this.state.DateOfJoining,
-        PhotoFileName: this.state.PhotoFileName.join(","), // save as comma-separated string
+        PhotoFileName: this.state.PhotoFileName.join(","), // save as comma string
       }),
     })
       .then((res) => res.json())
@@ -129,17 +126,18 @@ export default class Employee extends Component {
           alert(result.message);
           this.refreshList();
         },
-        (error) => alert("Failed"),
+        () => alert("Failed"),
       );
   }
 
+  // Update Employee
   updateClick() {
     const token = this.getToken();
     if (!token) return;
 
     const photos = Array.isArray(this.state.PhotoFileName)
       ? this.state.PhotoFileName.join(",")
-      : this.state.PhotoFileName; // kung string na
+      : this.state.PhotoFileName;
 
     fetch(variables.API_URL + "employee", {
       method: "PUT",
@@ -162,13 +160,15 @@ export default class Employee extends Component {
           alert(result.message);
           this.refreshList();
         },
-        (error) => alert("Failed"),
+        () => alert("Failed"),
       );
   }
 
+  // Delete Employee
   deleteClick(id) {
     const token = this.getToken();
     if (!token) return;
+
     if (!window.confirm("Are you sure?")) return;
 
     fetch(variables.API_URL + "employee/" + id, {
@@ -181,34 +181,41 @@ export default class Employee extends Component {
           alert(result.message);
           this.refreshList();
         },
-        (error) => alert("Failed"),
+        () => alert("Failed"),
       );
   }
 
-  // =======================
-  // IMAGE UPLOAD
-  // =======================
-  imageUpload = (e) => {
+  // Image upload (multiple)
+  imageUpload = async (e) => {
     e.preventDefault();
     const token = this.getToken();
     if (!token) return;
 
-    const files = Array.from(e.target.files);
-    const formData = new FormData();
-    files.forEach((file) => formData.append("files", file, file.name));
+    const files = e.target.files;
+    if (!files.length) return;
 
-    fetch(variables.API_URL + "employee/savefile", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData,
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        // merge newly uploaded files to existing PhotoFileName array
+    const formData = new FormData();
+    for (const file of files) {
+      formData.append("files", file, file.name);
+    }
+
+    try {
+      const res = await fetch(variables.API_URL + "employee/savefile", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (data.fileNames) {
+        // append to existing photos
         this.setState({
           PhotoFileName: [...this.state.PhotoFileName, ...data.fileNames],
         });
-      });
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   render() {
@@ -245,7 +252,7 @@ export default class Employee extends Component {
                 <th className="px-6 py-3">ID</th>
                 <th className="px-6 py-3">Name</th>
                 <th className="px-6 py-3">Department</th>
-                <th className="px-6 py-3">DOL</th>
+                <th className="px-6 py-3">Date</th>
                 <th className="px-6 py-3 text-center">Actions</th>
               </tr>
             </thead>
@@ -276,7 +283,7 @@ export default class Employee extends Component {
           </table>
         </div>
 
-        {/* FORM SECTION */}
+        {/* FORM */}
         <div className="bg-white p-6 rounded-xl shadow max-w-4xl">
           <h3 className="text-lg font-semibold mb-6">{modalTitle}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -306,9 +313,7 @@ export default class Employee extends Component {
                 ))}
               </select>
 
-              <label className="block text-sm font-medium mb-1">
-                Date of Joining
-              </label>
+              <label className="block text-sm font-medium mb-1">Date</label>
               <input
                 type="date"
                 value={DateOfJoining}
@@ -317,31 +322,23 @@ export default class Employee extends Component {
               />
             </div>
 
-            {/* RIGHT SIDE */}
+            {/* RIGHT SIDE: MULTIPLE IMAGES */}
             <div className="flex flex-col items-center">
-              <div className="flex flex-wrap gap-4 mb-4">
-                {PhotoFileName.length > 0 ? (
-                  PhotoFileName.map((file, index) => (
-                    <img
-                      key={index}
-                      src={PhotoPath + file}
-                      alt={`Employee ${index + 1}`}
-                      className="w-40 h-40 object-cover rounded-lg shadow"
-                    />
-                  ))
-                ) : (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {PhotoFileName.map((file) => (
                   <img
-                    src={PhotoPath + "default-avatar.png"}
+                    key={file}
+                    src={PhotoPath + file}
                     alt="Employee"
-                    className="w-40 h-40 object-cover rounded-lg shadow"
+                    className="w-32 h-32 object-cover rounded-lg shadow"
                   />
-                )}
+                ))}
               </div>
               <input
                 type="file"
+                multiple
                 onChange={this.imageUpload}
                 className="border p-2 rounded-lg"
-                multiple // allow multiple file selection
               />
             </div>
           </div>
