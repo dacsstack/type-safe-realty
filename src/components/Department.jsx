@@ -59,7 +59,7 @@ export default class Department extends Component {
   };
 
   refreshList() {
-    fetch(variables.API_URL + "department", {
+    fetch("Fetching from:", variables.API_URL + "department", {
       method: "GET",
       headers: {
         Accept: "application/json",
