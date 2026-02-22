@@ -34,7 +34,7 @@ export default function Login({ setToken }) {
 
       localStorage.setItem("token", data.token);
       setToken(data.token);
-      navigate("/"); // redirect to home after login
+      navigate("/");
     } catch (err) {
       console.error(err);
       setError("Server error, try again.");
@@ -44,8 +44,17 @@ export default function Login({ setToken }) {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[70vh]">
+    <div className="flex items-center justify-center min-h-[70vh] bg-gray-50">
       <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-lg">
+        {/* LOGO */}
+        <div className="flex justify-center mb-4">
+          <img
+            src="/logo.png"
+            alt="Fort Hub Realty Logo"
+            className="h-20 object-contain"
+          />
+        </div>
+
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
           Fort Hub Realty System Login
         </h2>
