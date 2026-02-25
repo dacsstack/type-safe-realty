@@ -1,116 +1,98 @@
 import { useEffect, useState } from "react";
+import { variables } from "../Variables.jsx";
 
-const slides = [
-  {
-    image: "/images/slide-1.jpg",
-    title: "Find Your Dream Property",
-    subtitle: "Trusted Real Estate Experts",
-  },
-  {
-    image: "/images/slide-2.jpg",
-    title: "Prime Investment Locations",
-    subtitle: "Best Deals in Metro Manila",
-  },
-  {
-    image: "/images/slide-3.jpg",
-    title: "Luxury & Affordable Homes",
-    subtitle: "Your Property Partner",
-  },
-];
+export default function Home() {
+  const [projects, setProjects] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-export default function HeroSlider() {
-  const [current, setCurrent] = useState(0);
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    contact: "",
-    message: "",
-  });
+  const token = localStorage.getItem("token");
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % slides.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
+  // Fetch projects and departments
+  const fetchData = async () => {
+    if (!token) return;
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+    try {
+      // Fetch Projects
+      const resProj = await fetch(variables.API_URL + "employee", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const projData = await resProj.json();
+      setProjects(projData || []);
 
-    console.log("Form Data:", form);
+      // Fetch Departments
+      const resDept = await fetch(variables.API_URL + "department", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const deptData = await resDept.json();
+      setDepartments(deptData || []);
 
-    // 🔥 OPTIONAL: connect to backend API
-    // fetch("/api/inquiry", { method: "POST", body: JSON.stringify(form) })
-
-    alert("Message sent successfully!");
-    setForm({ name: "", email: "", contact: "", message: "" });
+      setLoading(false);
+    } catch (err) {
+      console.error("Fetch error:", err);
+      setProjects([]);
+      setDepartments([]);
+      setLoading(false);
+    }
   };
 
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // Utility to get department name
+  const getDepartmentName = (depId) => {
+    const dep = departments.find((d) => d.DepartmentId === depId);
+    return dep ? dep.DepartmentName : "";
+  };
+
+  if (loading) return <div className="text-center p-10">Loading...</div>;
+
   return (
-    <section
-      className="relative h-162.5 bg-cover bg-center transition-all duration-700"
-      style={{ backgroundImage: `url(${slides[current].image})` }}
-    >
-      <div className="bg-black/70 h-full flex items-center">
-        <div className="container mx-auto px-6 grid md:grid-cols-2 gap-10 items-center">
-          {/* LEFT SIDE TEXT */}
-          <div className="text-white">
-            <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight">
-              {slides[current].title}
-            </h1>
-            <p className="text-lg opacity-90">{slides[current].subtitle}</p>
-          </div>
-
-          {/* RIGHT SIDE CONTACT FORM */}
-          <div className="bg-white p-8 rounded-2xl shadow-2xl">
-            <h2 className="text-2xl font-bold mb-4 text-gray-800">Write Us</h2>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <input
-                type="text"
-                placeholder="Your Name"
-                required
-                className="w-full border rounded-lg p-3"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-              />
-
-              <input
-                type="email"
-                placeholder="Email"
-                required
-                className="w-full border rounded-lg p-3"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-              />
-
-              <input
-                type="text"
-                placeholder="Contact Number"
-                className="w-full border rounded-lg p-3"
-                value={form.contact}
-                onChange={(e) => setForm({ ...form, contact: e.target.value })}
-              />
-
-              <textarea
-                placeholder="Your Message"
-                required
-                className="w-full border rounded-lg p-3"
-                rows="4"
-                value={form.message}
-                onChange={(e) => setForm({ ...form, message: e.target.value })}
-              />
-
-              <button
-                type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition"
-              >
-                Send Message
-              </button>
-            </form>
-          </div>
+    <div className="space-y-10">
+      {/* DASHBOARD STATS */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-blue-600 text-white p-6 rounded-xl shadow">
+          <h2 className="text-xl font-semibold mb-2">Total Projects</h2>
+          <p className="text-3xl font-bold">{projects.length}</p>
+        </div>
+        <div className="bg-green-600 text-white p-6 rounded-xl shadow">
+          <h2 className="text-xl font-semibold mb-2">Total Developers</h2>
+          <p className="text-3xl font-bold">{departments.length}</p>
         </div>
       </div>
-    </section>
+
+      {/* PROJECTS GRID */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {projects.map((proj) => (
+          <div
+            key={proj.EmployeeId}
+            className="bg-white rounded-xl shadow overflow-hidden hover:shadow-lg transition"
+          >
+            {/* PROJECT IMAGE */}
+            {proj.PhotoFileName ? (
+              <img
+                src={variables.PHOTO_URL + proj.PhotoFileName}
+                alt={proj.EmployeeName}
+                className="w-full h-48 object-cover"
+              />
+            ) : (
+              <div className="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-400">
+                No Image
+              </div>
+            )}
+
+            {/* PROJECT INFO */}
+            <div className="p-4">
+              <h3 className="text-lg font-semibold">{proj.EmployeeName}</h3>
+              <p className="text-gray-600">Developer: {proj.Department}</p>
+              <p className="text-gray-500 text-sm">
+                Date of Listing: {proj.DateOfJoining}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
