@@ -1,14 +1,16 @@
-import { useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Layout from "../layouts/Layout";
-export default function BlogDetails() {
-  const { id } = useParams();
-  const [blogs, setBlogs] = useState(null);
+import type { Blog } from "../types";
+
+const BlogDetails: FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const [blogs, setBlogs] = useState<Blog | null>(null);
 
   useEffect(() => {
     fetch(`http://localhost:5000/api/blogs/${id}`)
       .then((res) => res.json())
-      .then((data) => setBlogs(data));
+      .then((data: Blog) => setBlogs(data));
   }, [id]);
 
   if (!blogs) return <div>Loading...</div>;
@@ -20,12 +22,6 @@ export default function BlogDetails() {
 
         {blogs.VideoUrl && (
           <div className="aspect-video mb-6">
-            {/* <ReactPlayer
-              url={blogs.VideoUrl}
-              width="100%"
-              height="100%"
-              controls
-            /> */}
             <iframe
               className="w-full h-full rounded-t-2xl"
               src={blogs.VideoUrl.replace("watch?v=", "embed/")}
@@ -35,8 +31,10 @@ export default function BlogDetails() {
           </div>
         )}
 
-        <p className="text-gray-300 leading-relaxed">{blogs.Description}</p>
+        <p className="text-gray-200 leading-relaxe">{blogs.Description}</p>
       </div>
     </Layout>
   );
-}
+};
+
+export default BlogDetails;

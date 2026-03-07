@@ -1,11 +1,13 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import HeroSlider from "../components/HeroSlider";
 import WhatsAppChat from "../components/WhatsAppChat";
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [showAllBlogs, setShowAllBlogs] = useState(false);
   const [projects, setProjects] = useState([]);
   const [blogs, setBlogs] = useState([]);
   const [about, setAbout] = useState([]);
@@ -26,17 +28,30 @@ export default function LandingPage() {
     }
   };
 
-  const fetchFilteredProjects = async () => {
-    const query = new URLSearchParams({
-      location: filters.location || "",
-      type: filters.type || "",
-      minPrice: filters.minPrice || "",
-      maxPrice: filters.maxPrice || "",
-    }).toString();
+  const fetchFilteredProjects = async (overrideFilters = {}) => {
+    try {
+      // Merge current filters with optional overrides (used for featured projects clicks)
+      const currentFilters = { ...filters, ...overrideFilters };
 
-    const response = await fetch(`http://localhost:5000/api/project?${query}`);
+      // Only send non-empty filters
+      const queryObj = {};
+      if (currentFilters.location) queryObj.location = currentFilters.location;
+      if (currentFilters.type) queryObj.type = currentFilters.type;
+      if (currentFilters.minPrice) queryObj.minPrice = currentFilters.minPrice;
+      if (currentFilters.maxPrice) queryObj.maxPrice = currentFilters.maxPrice;
 
-    const data = await response.json();
+      const query = new URLSearchParams(queryObj).toString();
+
+      const res = await axios.get(
+        `http://localhost:5000/api/project${query ? "?" + query : ""}`,
+      );
+
+      setProjects(res.data);
+      // ✅ scroll to projects section after fetching
+      if (scroll) scrollToSection("projects");
+    } catch (err) {
+      console.error("Error fetching projects:", err);
+    }
 
     // ✅ If empty result, reload all projects
     if (!data || data.length === 0) {
@@ -46,7 +61,10 @@ export default function LandingPage() {
       setProjects(data);
     }
   };
-
+  const handleFeaturedClick = (locationName) => {
+    fetchFilteredProjects({ location: locationName }, true); // scroll to projects
+    setFilters((prev) => ({ ...prev, location: locationName }));
+  };
   useEffect(() => {
     // fetch projects from backend (public)
     axios
@@ -68,8 +86,9 @@ export default function LandingPage() {
   return (
     <div className="font-['Roboto_Condensed']">
       {/* HEADER */}
-      <header className="bg-gray-600 shadow-md sticky top-0 z-50 opacity-80">
+      <header className="bg-gray-600 shadow-md sticky top-0 z-50 opacity-90">
         <div className="container mx-auto flex items-center justify-between p-4">
+          {/* LOGO */}
           <a href="/" className="flex items-center gap-3">
             <img src="/logo.png" alt="Fort Hub Realty" className="h-12" />
             <div>
@@ -80,15 +99,15 @@ export default function LandingPage() {
                 Educate clients about the hot real estate deals
               </small>
             </div>
-            s
           </a>
-          <nav>
+
+          {/* DESKTOP MENU */}
+          <nav className="hidden md:block">
             <ul className="flex gap-6 text-white">
               <li>
                 <button
                   onClick={() => scrollToSection("home")}
-                  s
-                  className="font-medium"
+                  className="font-medium hover:text-yellow-300 transition"
                 >
                   Home
                 </button>
@@ -97,7 +116,7 @@ export default function LandingPage() {
               <li>
                 <button
                   onClick={() => scrollToSection("blogs")}
-                  className="font-medium"
+                  className="font-medium hover:text-yellow-300 transition"
                 >
                   Blogs
                 </button>
@@ -106,7 +125,7 @@ export default function LandingPage() {
               <li>
                 <button
                   onClick={() => scrollToSection("about")}
-                  className="font-medium"
+                  className="font-medium hover:text-yellow-300 transition"
                 >
                   About
                 </button>
@@ -115,7 +134,7 @@ export default function LandingPage() {
               <li>
                 <button
                   onClick={() => scrollToSection("projects")}
-                  className="font-medium"
+                  className="font-medium hover:text-yellow-300 transition"
                 >
                   Our Projects
                 </button>
@@ -124,14 +143,62 @@ export default function LandingPage() {
               <li>
                 <button
                   onClick={() => scrollToSection("contact")}
-                  className="font-medium"
+                  className="font-medium hover:text-yellow-300 transition"
                 >
                   Contact
                 </button>
               </li>
             </ul>
           </nav>
+
+          {/* MOBILE MENU BUTTON */}
+          <button
+            className="md:hidden text-white text-2xl"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            ☰
+          </button>
         </div>
+
+        {/* MOBILE MENU */}
+        {menuOpen && (
+          <div className="md:hidden bg-gray-700 text-white flex flex-col items-center gap-4 py-4">
+            <button
+              onClick={() => scrollToSection("home")}
+              className="hover:text-yellow-300"
+            >
+              Home
+            </button>
+
+            <button
+              onClick={() => scrollToSection("blogs")}
+              className="hover:text-yellow-300"
+            >
+              Blogs
+            </button>
+
+            <button
+              onClick={() => scrollToSection("about")}
+              className="hover:text-yellow-300"
+            >
+              About
+            </button>
+
+            <button
+              onClick={() => scrollToSection("projects")}
+              className="hover:text-yellow-300"
+            >
+              Our Projects
+            </button>
+
+            <button
+              onClick={() => scrollToSection("contact")}
+              className="hover:text-yellow-300"
+            >
+              Contact
+            </button>
+          </div>
+        )}
       </header>
       {/* HERO SLIDER */}
       <HeroSlider scrollToSection={scrollToSection} />
@@ -162,11 +229,12 @@ export default function LandingPage() {
 
       <section id="projects" className="py-16 bg-black/50 opacity-90">
         <div className="container mx-auto">
-          <div className=" bg-black/50  p-6 rounded-2xl shadow-lg mb-8 grid md:grid-cols-5 gap-4">
+          <div className="bg-black/50 p-6 rounded-2xl shadow-lg mb-8 grid md:grid-cols-5 gap-4">
             <input
               type="text"
               placeholder="Location"
-              className=" bg-gray-600 p-2 rounded  text-white placeholder:text-gray-400"
+              className="bg-gray-600 p-2 rounded text-white placeholder:text-gray-400 
+               transform transition duration-300 hover:scale-105 hover:bg-gray-500 focus:scale-105 focus:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400"
               value={filters.location}
               onChange={(e) =>
                 setFilters({ ...filters, location: e.target.value })
@@ -176,7 +244,8 @@ export default function LandingPage() {
             <input
               type="text"
               placeholder="Property Type"
-              className="bg-gray-600 p-2 rounded  text-white placeholder:text-gray-400"
+              className="bg-gray-600 p-2 rounded text-white placeholder:text-gray-400 
+               transform transition duration-300 hover:scale-105 hover:bg-gray-500 focus:scale-105 focus:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400"
               value={filters.type}
               onChange={(e) => setFilters({ ...filters, type: e.target.value })}
             />
@@ -184,7 +253,8 @@ export default function LandingPage() {
             <input
               type="number"
               placeholder="Min Price"
-              className="bg-gray-600 p-2 rounded  text-white placeholder:text-gray-400"
+              className="bg-gray-600 p-2 rounded text-white placeholder:text-gray-400 
+               transform transition duration-300 hover:scale-105 hover:bg-gray-500 focus:scale-105 focus:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400"
               value={filters.minPrice}
               onChange={(e) =>
                 setFilters({ ...filters, minPrice: e.target.value })
@@ -194,7 +264,8 @@ export default function LandingPage() {
             <input
               type="number"
               placeholder="Max Price"
-              className="bg-gray-600 p-2 rounded  text-white placeholder:text-gray-400"
+              className="bg-gray-600 p-2 rounded text-white placeholder:text-gray-400 
+               transform transition duration-300 hover:scale-105 hover:bg-gray-500 focus:scale-105 focus:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400"
               value={filters.maxPrice}
               onChange={(e) =>
                 setFilters({ ...filters, maxPrice: e.target.value })
@@ -202,8 +273,8 @@ export default function LandingPage() {
             />
 
             <button
-              onClick={fetchFilteredProjects}
-              className="bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
+              onClick={() => fetchFilteredProjects()}
+              className="bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transform transition duration-300 hover:scale-105"
             >
               Search
             </button>
@@ -212,8 +283,12 @@ export default function LandingPage() {
             Our Accredited Projects
           </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 w-full border border-black/30 text-blue-600 rounded-xl p-3 bg-white/10 focus:outline-none focus:border-blue-500 transition">
-            {Array.isArray(projects) &&
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 w-full border border-black/30 text-blue-200 rounded-xl p-3 bg-white/30 focus:outline-none focus:border-blue-500 transition">
+            {Array.isArray(projects) && projects.length === 0 ? (
+              <div className="col-span-full text-center py-10 text-white text-xl">
+                No Available Project
+              </div>
+            ) : (
               projects.map((p) => {
                 // SAFE convert PhotoFileName to array
                 let photos = [];
@@ -243,7 +318,7 @@ export default function LandingPage() {
                       className="w-full h-64 object-cover group-hover:scale-110 transition duration-500"
                     />
 
-                    <div className="absolute inset-0 bg-black/50 group-hover:bg-black/60 transition"></div>
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/5 transition"></div>
 
                     <div className="absolute bottom-4 left-4 text-white">
                       <h3 className="text-xl font-bold">{p.ProjectName}</h3>
@@ -251,7 +326,8 @@ export default function LandingPage() {
                     </div>
                   </div>
                 );
-              })}
+              })
+            )}
           </div>
         </div>
       </section>
@@ -280,92 +356,98 @@ export default function LandingPage() {
                 <div
                   key={p.AboutId}
                   onClick={() => navigate(`/about/${p.AboutId}`)}
-                  className="bg-black/50 p-6 rounded shadow"
+                  className="group relative bg-black/50 rounded-2xl overflow-hidden shadow-lg cursor-pointer transform transition-transform duration-500 hover:scale-105 hover:shadow-2xl"
                 >
-                  <h3 className="text-3xl font-bold mb-4 text-white">
-                    {p.Feature}
-                  </h3>
+                  {/* IMAGE */}
                   <img
                     src={firstPhoto}
                     alt={p.Title}
-                    className="w-full h-48 object-cover rounded"
+                    className="w-full h-48 object-cover transform transition-transform duration-500 group-hover:scale-105"
                   />
-                  <p className="text-white text-sm">{p.Title}</p>
-                  <a href="#" className="mt-2 inline-block text-blue-600">
-                    Read more
-                  </a>
+
+                  {/* LIGHT HOVER OVERLAY */}
+                  <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
+
+                  {/* CONTENT */}
+                  <div className="p-6 relative z-10">
+                    <h3 className="text-3xl font-bold mb-4 text-white">
+                      {p.Feature}
+                    </h3>
+                    <p className="text-white text-sm">{p.Title}</p>
+                    <a
+                      href="#"
+                      className="mt-2 inline-block text-blue-200 font-semibold hover:underline"
+                    >
+                      Read more
+                    </a>
+                  </div>
                 </div>
               );
             })}
         </div>
       </section>
-      {/* TESTIMONIALS + BLOGS */}
+      {/* BLOGS SECTION */}
       <section id="blogs" className="py-20 bg-black/50">
         <div className="container mx-auto px-6">
           <div className="flex justify-between items-center mb-12">
-            <h2 className="text-4xl font-bold text-white">Latest Insights</h2>
+            <h2 className="text-4xl font-bold text-white">Latest Blogs</h2>
 
-            <button
-              onClick={() => navigate("/blogs")}
-              className="text-blue-400 font-semibold hover:underline"
-            >
-              View All →
-            </button>
+            {/* Toggle all blogs */}
+            {!showAllBlogs && (
+              <button
+                onClick={() => setShowAllBlogs(true)}
+                className="text-blue-400 font-semibold hover:underline"
+              >
+                View All →
+              </button>
+            )}
           </div>
 
           <div className="grid md:grid-cols-3 gap-10">
-            {blogs.slice(0, 3).map((b) => (
+            {(showAllBlogs ? blogs : blogs.slice(0, 3)).map((b) => (
               <div
                 key={b.BlogId}
-                className="bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition duration-300"
+                className="group relative rounded-2xl overflow-hidden shadow-lg cursor-pointer transform transition-transform duration-500 hover:scale-105 hover:shadow-2xl"
               >
-                {/* VIDEO or IMAGE */}
+                {/* IMAGE / VIDEO */}
                 {b.VideoUrl ? (
-                  <div className="aspect-video">
-                    {b.VideoUrl && (
-                      <div className="aspect-video">
-                        {/* <iframe
-                          className="w-full h-full rounded-t-2xl"
-                          src={b.VideoUrl.replace("watch?v=", "embed/")}
-                          title="Blog Video"
-                          allowFullScreen
-                        /> */}
-                        <div className="aspect-video overflow-hidden">
-                          <img
-                            src={`https://img.youtube.com/vi/${b.VideoUrl.split("v=")[1]}/hqdefault.jpg`}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      </div>
-                    )}
+                  <div className="aspect-video overflow-hidden">
+                    <img
+                      src={`https://img.youtube.com/vi/${b.VideoUrl.split("v=")[1]}/hqdefault.jpg`}
+                      className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-105"
+                    />
                   </div>
                 ) : (
                   <img
                     src={`http://localhost:5000/uploads/${b.Image}`}
                     alt={b.Title}
-                    className="w-full h-52 object-cover"
+                    className="w-full h-52 object-cover transform transition-transform duration-500 group-hover:scale-105"
                   />
                 )}
 
-                {/* CONTENT */}
-                <div className="p-6">
-                  {new Date(b.CreatedAt).toLocaleDateString("en-US", {
-                    month: "long",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
+                {/* LIGHT HOVER OVERLAY */}
+                <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
 
-                  <h3 className="text-lg font-bold mb-3 line-clamp-2">
+                {/* CONTENT */}
+                <div className="p-6 relative z-10">
+                  <p className="text-gray-400 text-sm mb-2">
+                    {new Date(b.CreatedAt).toLocaleDateString("en-US", {
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </p>
+
+                  <h3 className="text-lg text-gray-400 font-bold mb-3">
                     {b.Title}
                   </h3>
-
-                  <p className="text-gray-600 text-sm line-clamp-3">
+                  <p className="text-gray-200 text-sm line-clamp-3">
                     {b.Description}
                   </p>
 
                   <button
                     onClick={() => navigate(`/blogs/${b.BlogId}`)}
-                    className="mt-4 text-blue-600 font-semibold hover:underline"
+                    className="mt-4 text-blue-200 font-semibold hover:underline"
                   >
                     Read More →
                   </button>
@@ -373,6 +455,18 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+
+          {/* Show Less button */}
+          {showAllBlogs && (
+            <div className="text-center mt-6">
+              <button
+                onClick={() => setShowAllBlogs(false)}
+                className="text-blue-400 font-semibold hover:underline"
+              >
+                Show Less ↑
+              </button>
+            </div>
+          )}
         </div>
       </section>
       {/* CHAT WIDGET */}
@@ -421,53 +515,77 @@ export default function LandingPage() {
 
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/home" className="hover:text-white transition">
+                <button
+                  onClick={() => scrollToSection("home")}
+                  s
+                  className="hover:text-white transition"
+                >
                   Home
-                </Link>
+                </button>
               </li>
 
               <li>
-                <Link to="/project" className="hover:text-white transition">
-                  Projects
-                </Link>
+                <button
+                  onClick={() => scrollToSection("projects")}
+                  s
+                  className="hover:text-white transition"
+                >
+                  Our Projects
+                </button>
               </li>
 
               <li>
-                <Link to="/about" className="hover:text-white transition">
+                <button
+                  onClick={() => scrollToSection("about")}
+                  s
+                  className="hover:text-white transition"
+                >
                   About Us
-                </Link>
+                </button>
               </li>
 
               <li>
-                <Link to="/contact" className="hover:text-white transition">
-                  Contact
-                </Link>
+                <button
+                  onClick={() => scrollToSection("contact")}
+                  s
+                  className="hover:text-white transition"
+                >
+                  Contact Us
+                </button>
               </li>
             </ul>
           </div>
 
           {/* FEATURED PROJECTS */}
-          <div>
-            <h3 className="text-white font-semibold mb-4">Featured Projects</h3>
+          <ul className="space-y-2 text-sm">
+            <li
+              className="hover:text-white transition cursor-pointer"
+              onClick={() => handleFeaturedClick("Taguig")}
+            >
+              BGC Taguig Condo
+            </li>
 
-            <ul className="space-y-2 text-sm">
-              <li className="hover:text-white transition cursor-pointer">
-                BGC Taguig Condo
-              </li>
+            <li
+              className="hover:text-white transition cursor-pointer"
+              onClick={() => handleFeaturedClick("Makati")}
+            >
+              Makati Luxury Condo
+            </li>
 
-              <li className="hover:text-white transition cursor-pointer">
-                Makati Luxury Condo
-              </li>
+            <li
+              className="hover:text-white transition cursor-pointer"
+              onClick={() => handleFeaturedClick("Quezon City")}
+            >
+              Quezon City Residences
+            </li>
 
-              <li className="hover:text-white transition cursor-pointer">
-                Quezon City Residences
-              </li>
-
-              <li className="hover:text-white transition cursor-pointer">
-                Cebu Beach Property
-              </li>
-            </ul>
-          </div>
+            <li
+              className="hover:text-white transition cursor-pointer"
+              onClick={() => handleFeaturedClick("Cebu")}
+            >
+              Cebu Beach Property
+            </li>
+          </ul>
 
           {/* CONTACT INFO */}
           <div id="contact">

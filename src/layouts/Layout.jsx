@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import WhatsAppChat from "../components/WhatsAppChat";
 
 export default function Layout({ children }) {
+  const [menuOpen, setMenuOpen] = useState(false);
   // ✅ scroll function HERE
   const scrollToSection = (id) => {
     const section = document.getElementById(id);
@@ -15,8 +17,9 @@ export default function Layout({ children }) {
   return (
     <div className="flex flex-col min-h-screen font-['Roboto_Condensed']">
       {/* HEADER */}
-      <header className="bg-gray-600 shadow-md sticky top-0 z-50 opacity-80">
+      <header className="bg-gray-600 shadow-md sticky top-0 z-50 opacity-90">
         <div className="container mx-auto flex items-center justify-between p-4">
+          {/* LOGO */}
           <Link to="/" className="flex items-center gap-3">
             <img src="/logo.png" alt="Fort Hub Realty" className="h-12" />
 
@@ -31,10 +34,14 @@ export default function Layout({ children }) {
             </div>
           </Link>
 
-          <nav>
+          {/* DESKTOP NAV */}
+          <nav className="hidden md:block">
             <ul className="flex gap-6 text-white">
               <li>
-                <Link to="/" className="font-medium">
+                <Link
+                  to="/"
+                  className="font-medium hover:text-yellow-300 transition"
+                >
                   Home
                 </Link>
               </li>
@@ -42,32 +49,96 @@ export default function Layout({ children }) {
               <li>
                 <button
                   onClick={() => scrollToSection("blogs")}
-                  className="font-medium"
+                  className="font-medium hover:text-yellow-300 transition"
                 >
                   Blogs
                 </button>
               </li>
 
               <li>
-                <Link to="/" className="font-medium">
+                <Link
+                  to="/"
+                  className="font-medium hover:text-yellow-300 transition"
+                >
                   About
                 </Link>
               </li>
 
               <li>
-                <Link to="/" className="font-medium">
+                <Link
+                  to="/"
+                  className="font-medium hover:text-yellow-300 transition"
+                >
                   Our Projects
                 </Link>
               </li>
 
               <li>
-                <Link to="/" className="font-medium">
+                <Link
+                  to="/"
+                  className="font-medium hover:text-yellow-300 transition"
+                >
                   Contact
                 </Link>
               </li>
             </ul>
           </nav>
+
+          {/* MOBILE BUTTON */}
+          <button
+            className="md:hidden text-white text-2xl"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            ☰
+          </button>
         </div>
+
+        {/* MOBILE MENU */}
+        {menuOpen && (
+          <div className="md:hidden bg-gray-700 text-white flex flex-col items-center gap-4 py-4">
+            <Link
+              to="/"
+              className="hover:text-yellow-300"
+              onClick={() => setMenuOpen(false)}
+            >
+              Home
+            </Link>
+
+            <button
+              onClick={() => {
+                scrollToSection("blogs");
+                setMenuOpen(false);
+              }}
+              className="hover:text-yellow-300"
+            >
+              Blogs
+            </button>
+
+            <Link
+              to="/"
+              className="hover:text-yellow-300"
+              onClick={() => setMenuOpen(false)}
+            >
+              About
+            </Link>
+
+            <Link
+              to="/"
+              className="hover:text-yellow-300"
+              onClick={() => setMenuOpen(false)}
+            >
+              Our Projects
+            </Link>
+
+            <Link
+              to="/"
+              className="hover:text-yellow-300"
+              onClick={() => setMenuOpen(false)}
+            >
+              Contact
+            </Link>
+          </div>
+        )}
       </header>
 
       {/* CONTENT — grows to push footer down */}

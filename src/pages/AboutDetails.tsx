@@ -1,21 +1,20 @@
-import axios from "axios";
-import { useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Layout from "../layouts/Layout";
-export default function ProjectDetails() {
-  const { id } = useParams();
+import type { About } from "../types";
+
+const AboutDetails: FC = () => {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const [project, setProject] = useState(null);
-  const [photos, setPhotos] = useState([]);
+  const [about, setAbout] = useState<About | null>(null);
+  const [photos, setPhotos] = useState<string[]>([]);
 
   useEffect(() => {
-    axios
-      .get(`http://localhost:5000/api/project/${id}`)
-      .then((res) => {
-        const data = res.data;
-
-        setProject(data);
+    fetch(`http://localhost:5000/api/about/${id}`)
+      .then((res) => res.json())
+      .then((data: About) => {
+        setAbout(data);
 
         // convert photos safely
         if (data.PhotoFileName) {
@@ -31,8 +30,8 @@ export default function ProjectDetails() {
       });
   }, [id]);
 
-  if (!project) {
-    return <div className="p-10 text-center">Loading project details...</div>;
+  if (!about) {
+    return <div className="p-10 text-center">Loading about details...</div>;
   }
 
   return (
@@ -45,13 +44,11 @@ export default function ProjectDetails() {
           ← Back
         </button>
 
-        <h1 className="text-3xl font-bold mb-2 text-white">
-          {project.ProjectName}
-        </h1>
+        <h1 className="text-3xl font-bold mb-2 text-white">{about.Title}</h1>
 
-        <p className="text-white mb-4">Developer: {project.Developer}</p>
+        <p className="text-gray-300 mb-4">Feature: {about.Feature}</p>
 
-        <p className="text-gray-300 mb-6">{project.PropertyDetails}</p>
+        <p className="mb-6 text-white">{about.Description}</p>
 
         <div className="grid grid-cols-3 gap-4">
           {photos.map((photo, index) => (
@@ -65,4 +62,6 @@ export default function ProjectDetails() {
       </div>
     </Layout>
   );
-}
+};
+
+export default AboutDetails;

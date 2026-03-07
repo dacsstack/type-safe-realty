@@ -1,4 +1,4 @@
-import { useState, FC } from "react";
+import { FC, useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import About from "./components/About";
@@ -17,7 +17,9 @@ import ProjectDetails from "./pages/ProjectDetails";
 import ProtectedRoute from "./ProtectedRoute";
 
 const App: FC = () => {
-  const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+  const [token, setToken] = useState<string | null>(
+    localStorage.getItem("token"),
+  );
 
   return (
     <BrowserRouter>

@@ -3,10 +3,10 @@ import { BrowserRouter, NavLink, Route, Routes } from "react-router-dom";
 
 import Developer from "./components/Developer.jsx";
 import Home from "./components/Home.jsx";
-import Login from "./components/Login.jsx";
+import Login from "./components/Login.js";
 import Project from "./components/Project.jsx";
 import LandingPage from "./pages/LandingPage.jsx";
-import ProtectedRoute from "./ProtectedRoute.jsx";
+import ProtectedRoute from "./ProtectedRoute.js";
 
 function App() {
   const [token, setToken] = useState(() => localStorage.getItem("token"));

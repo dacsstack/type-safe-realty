@@ -1,17 +1,22 @@
 import { useEffect, useRef, useState } from "react";
 
+interface ChatMessage {
+  type: "user" | "agent";
+  text: string;
+}
+
 export default function WhatsAppChat() {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState<ChatMessage[]>([
     { type: "agent", text: "Hi! How can we help you today?" },
   ]);
   const [isTyping, setIsTyping] = useState(false);
 
   const phone = "639770682561"; // WhatsApp number
-  const messagesEndRef = useRef(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Listen for external button click (from HeroSlider)
+  // Listen for external HeroSlider button click
   useEffect(() => {
     const openChat = () => setOpen(true);
     window.addEventListener("openWhatsAppChat", openChat);
@@ -23,7 +28,7 @@ export default function WhatsAppChat() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  // Simulate agent typing when popup opens
+  // Simulate agent typing indicator for first few seconds
   useEffect(() => {
     if (!open) return;
     setIsTyping(true);
@@ -35,18 +40,21 @@ export default function WhatsAppChat() {
     if (!input.trim()) return;
 
     // Add user message
-    setMessages([...messages, { type: "user", text: input }]);
+    setMessages((prev) => [...prev, { type: "user", text: input }]);
 
-    // Prepare WhatsApp text
+    // Prepare WhatsApp text (all messages)
     const allText = [...messages, { type: "user", text: input }]
       .map((msg) => msg.text)
       .join("\n");
 
-    const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(allText)}`;
+    const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(
+      allText,
+    )}`;
 
+    // Open WhatsApp in new tab
     window.open(url, "_blank", "noopener,noreferrer");
 
-    setInput(""); // clear input but keep popup open
+    setInput(""); // Clear input but keep popup open
   };
 
   return (
@@ -66,8 +74,9 @@ export default function WhatsAppChat() {
           <div className="flex justify-between items-center bg-green-500 text-white p-3 rounded-t-2xl">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-white overflow-hidden">
+                {/* Agent avatar placeholder */}
                 <img
-                  src="/logo.png"
+                  src="/agent-avatar.png"
                   alt="Agent"
                   className="w-full h-full object-cover"
                 />
@@ -82,10 +91,12 @@ export default function WhatsAppChat() {
             {messages.map((msg, idx) => (
               <div
                 key={idx}
-                className={`flex ${msg.type === "user" ? "justify-end" : "justify-start"}`}
+                className={`flex ${
+                  msg.type === "user" ? "justify-end" : "justify-start"
+                }`}
               >
                 <span
-                  className={`inline-block p-2 rounded-xl max-w-[75%] wrap-break-word ${
+                  className={`inline-block p-2 rounded-xl max-w-[75%] break-words ${
                     msg.type === "user"
                       ? "bg-green-500 text-white"
                       : "bg-gray-200 text-gray-800"
