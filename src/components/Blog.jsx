@@ -1,350 +1,152 @@
-import { Component } from "react";
-import { variables } from "../Variables.jsx";
+import axios from "axios";
+import { useEffect, useState } from "react";
 
-export default class Employee extends Component {
-  constructor(props) {
-    super(props);
+export default function BlogAdmin() {
+  const [blogs, setBlogs] = useState([]);
+  const [editing, setEditing] = useState(null);
+  const [form, setForm] = useState({
+    Title: "",
+    Description: "",
+    VideoUrl: "",
+  });
 
-    this.state = {
-      departments: [],
-      employees: [],
-      modalTitle: "",
-      EmployeeId: 0,
-      EmployeeName: "",
-      Department: "",
-      DateOfJoining: "",
-      PhotoFileName:
-        "office-center-company-buildings-icon-gray-vector-graphics_996135-51067.avif",
-      PhotoPath: variables.PHOTO_URL,
-    };
-  }
-
-  // TOKEN CHECK
-  getToken() {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Please login first!");
-      window.location.href = "/login";
-      return null;
+  // Fetch blogs
+  const fetchBlogs = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/blogs");
+      setBlogs(res.data);
+    } catch (err) {
+      console.error(err);
     }
-    return token;
-  }
-
-  // FETCH DATA
-  refreshList() {
-    const token = this.getToken();
-    if (!token) return;
-
-    // EMPLOYEES
-    fetch(variables.API_URL + "employee", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((response) => {
-        if (!response.ok)
-          throw new Error("Employee fetch error: " + response.status);
-        return response.json();
-      })
-      .then((data) => {
-        if (Array.isArray(data)) this.setState({ employees: data });
-        else this.setState({ employees: [] });
-      })
-      .catch((error) => {
-        console.error(error);
-        this.setState({ employees: [] });
-      });
-
-    // DEPARTMENTS
-    fetch(variables.API_URL + "department", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((response) => {
-        if (!response.ok)
-          throw new Error("Department fetch error: " + response.status);
-        return response.json();
-      })
-      .then((data) => {
-        if (Array.isArray(data)) this.setState({ departments: data });
-        else this.setState({ departments: [] });
-      })
-      .catch((error) => {
-        console.error(error);
-        this.setState({ departments: [] });
-      });
-  }
-
-  componentDidMount() {
-    this.refreshList();
-  }
-
-  // FORM HANDLERS
-  changeEmployeeName = (e) => this.setState({ EmployeeName: e.target.value });
-  changeDepartment = (e) => this.setState({ Department: e.target.value });
-  changeDateOfJoining = (e) => this.setState({ DateOfJoining: e.target.value });
-
-  addClick() {
-    this.setState({
-      modalTitle: "Add Employee",
-      EmployeeId: 0,
-      EmployeeName: "",
-      Department: "",
-      DateOfJoining: "",
-      PhotoFileName:
-        "office-center-company-buildings-icon-gray-vector-graphics_996135-51067.avif",
-    });
-  }
-
-  editClick(emp) {
-    this.setState({
-      modalTitle: "Edit Employee",
-      EmployeeId: emp.EmployeeId,
-      EmployeeName: emp.EmployeeName,
-      Department: emp.Department,
-      DateOfJoining: emp.DateOfJoining,
-      PhotoFileName:
-        emp.PhotoFileName ||
-        "office-center-company-buildings-icon-gray-vector-graphics_996135-51067.avif",
-    });
-  }
-
-  createClick() {
-    const token = this.getToken();
-    if (!token) return;
-
-    fetch(variables.API_URL + "employee", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        EmployeeName: this.state.EmployeeName,
-        Department: this.state.Department,
-        DateOfJoining: this.state.DateOfJoining,
-        PhotoFileName: this.state.PhotoFileName,
-      }),
-    })
-      .then((res) => res.json())
-      .then((result) => {
-        alert(result.message);
-        this.refreshList();
-      })
-      .catch(() => alert("Failed"));
-  }
-
-  updateClick() {
-    const token = this.getToken();
-    if (!token) return;
-
-    fetch(variables.API_URL + "employee", {
-      method: "PUT",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        EmployeeId: this.state.EmployeeId,
-        EmployeeName: this.state.EmployeeName,
-        Department: this.state.Department,
-        DateOfJoining: this.state.DateOfJoining,
-        PhotoFileName: this.state.PhotoFileName,
-      }),
-    })
-      .then((res) => res.json())
-      .then((result) => {
-        alert(result.message);
-        this.refreshList();
-      })
-      .catch(() => alert("Failed"));
-  }
-
-  deleteClick(id) {
-    const token = this.getToken();
-    if (!token) return;
-
-    if (window.confirm("Are you sure?")) {
-      fetch(variables.API_URL + "employee/" + id, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => res.json())
-        .then((result) => {
-          alert(result.message);
-          this.refreshList();
-        })
-        .catch(() => alert("Failed"));
-    }
-  }
-
-  // FILE UPLOAD
-  imageUpload = (e) => {
-    e.preventDefault();
-    const token = this.getToken();
-    if (!token) return;
-
-    const formData = new FormData();
-    formData.append("file", e.target.files[0], e.target.files[0].name);
-
-    fetch(variables.API_URL + "employee/savefile", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData,
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        this.setState({ PhotoFileName: data.fileName });
-      })
-      .catch((err) => console.error("File upload error:", err));
   };
 
-  render() {
-    const {
-      departments,
-      employees,
-      modalTitle,
-      EmployeeId,
-      EmployeeName,
-      Department,
-      DateOfJoining,
-      PhotoPath,
-      PhotoFileName,
-    } = this.state;
+  useEffect(() => {
+    fetchBlogs();
+  }, []);
 
-    return (
-      <div className="p-6">
-        {/* HEADER */}
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Employees</h2>
+  // CREATE or UPDATE blog
+  const handleSubmit = async () => {
+    try {
+      if (editing) {
+        await axios.put(
+          `http://localhost:5000/api/blogs/${editing.BlogId}`,
+          form,
+        );
+      } else {
+        await axios.post("http://localhost:5000/api/blogs", form);
+      }
+      setForm({ Title: "", Description: "", VideoUrl: "" });
+      setEditing(null);
+      fetchBlogs();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // DELETE blog
+  const handleDelete = async (id) => {
+    if (!confirm("Are you sure you want to delete this blog?")) return;
+    try {
+      await axios.delete(`http://localhost:5000/api/blogs/${id}`);
+      fetchBlogs();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Edit blog
+  const handleEdit = (blog) => {
+    setEditing(blog);
+    setForm({
+      Title: blog.Title,
+      Description: blog.Description || "",
+      VideoUrl: blog.VideoUrl || "",
+    });
+  };
+
+  return (
+    <div className="container mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-4">Blog Admin Portal</h1>
+
+      <div className="mb-6 p-4 border rounded shadow">
+        <h2 className="text-xl font-semibold mb-2">
+          {editing ? "Edit Blog" : "Add New Blog"}
+        </h2>
+
+        <input
+          type="text"
+          placeholder="Title"
+          value={form.Title}
+          onChange={(e) => setForm({ ...form, Title: e.target.value })}
+          className="border p-2 rounded w-full mb-2"
+        />
+
+        <textarea
+          placeholder="Description"
+          value={form.Description}
+          onChange={(e) => setForm({ ...form, Description: e.target.value })}
+          className="border p-2 rounded w-full mb-2"
+        />
+
+        <input
+          type="text"
+          placeholder="Video URL (optional)"
+          value={form.VideoUrl}
+          onChange={(e) => setForm({ ...form, VideoUrl: e.target.value })}
+          className="border p-2 rounded w-full mb-2"
+        />
+
+        <button
+          onClick={handleSubmit}
+          className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition"
+        >
+          {editing ? "Update Blog" : "Add Blog"}
+        </button>
+
+        {editing && (
           <button
-            onClick={() => this.addClick()}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow"
+            onClick={() => {
+              setEditing(null);
+              setForm({ Title: "", Description: "", VideoUrl: "" });
+            }}
+            className="ml-2 bg-gray-500 text-white p-2 rounded hover:bg-gray-600 transition"
           >
-            + Add Employee
+            Cancel
           </button>
-        </div>
-
-        {/* TABLE */}
-        <div className="overflow-x-auto bg-white rounded-xl shadow mb-8">
-          <table className="min-w-full text-sm text-left">
-            <thead className="bg-gray-100 uppercase text-xs text-gray-600">
-              <tr>
-                <th className="px-6 py-3">ID</th>
-                <th className="px-6 py-3">Employee Name</th>
-                <th className="px-6 py-3">Department</th>
-                <th className="px-6 py-3">Date Of Joining</th>
-                <th className="px-6 py-3 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {employees.map((emp) => (
-                <tr key={emp.EmployeeId} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">{emp.EmployeeId}</td>
-                  <td className="px-6 py-4">{emp.EmployeeName}</td>
-                  <td className="px-6 py-4">{emp.Department}</td>
-                  <td className="px-6 py-4">{emp.DateOfJoining}</td>
-                  <td className="px-6 py-4 flex justify-center gap-2">
-                    <button
-                      onClick={() => this.editClick(emp)}
-                      className="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-md"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => this.deleteClick(emp.EmployeeId)}
-                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* FORM */}
-        <div className="bg-white p-6 rounded-xl shadow max-w-4xl">
-          <h3 className="text-lg font-semibold mb-6">{modalTitle}</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* LEFT */}
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Employee Name
-              </label>
-              <input
-                type="text"
-                value={EmployeeName}
-                onChange={this.changeEmployeeName}
-                className="w-full border rounded-lg p-2 mb-4 focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-
-              <label className="block text-sm font-medium mb-1">
-                Department
-              </label>
-              <select
-                onChange={this.changeDepartment}
-                value={Department}
-                className="w-full border rounded-lg p-2 mb-4 focus:ring-2 focus:ring-blue-500 outline-none"
-              >
-                <option value="">Select Department</option>
-                {departments.map((dep) => (
-                  <option key={dep.DepartmentId} value={dep.DepartmentName}>
-                    {dep.DepartmentName}
-                  </option>
-                ))}
-              </select>
-
-              <label className="block text-sm font-medium mb-1">
-                Date Of Joining
-              </label>
-              <input
-                type="date"
-                value={DateOfJoining}
-                onChange={this.changeDateOfJoining}
-                className="w-full border rounded-lg p-2 mb-4 focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-            </div>
-
-            {/* RIGHT */}
-            <div className="flex flex-col items-center">
-              <img
-                className="w-52 h-52 object-cover rounded-lg shadow mb-4"
-                src={`${PhotoPath}${PhotoFileName}`}
-                alt="Employee"
-                onError={(e) => {
-                  e.target.src =
-                    "https://via.placeholder.com/200x200.png?text=No+Photo";
-                }}
-              />
-              <input
-                type="file"
-                onChange={this.imageUpload}
-                className="border p-2 rounded-lg"
-              />
-            </div>
-          </div>
-
-          {/* BUTTON */}
-          <div className="mt-6">
-            {EmployeeId === 0 ? (
-              <button
-                onClick={() => this.createClick()}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
-              >
-                Create
-              </button>
-            ) : (
-              <button
-                onClick={() => this.updateClick()}
-                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg"
-              >
-                Update
-              </button>
-            )}
-          </div>
-        </div>
+        )}
       </div>
-    );
-  }
+
+      <div className="grid md:grid-cols-2 gap-4">
+        {blogs.map((b) => (
+          <div
+            key={b.BlogId}
+            className="p-4 border rounded shadow flex justify-between items-center"
+          >
+            <div>
+              <h3 className="font-bold">{b.Title}</h3>
+              <p className="text-sm text-gray-600">{b.Description}</p>
+              {b.VideoUrl && (
+                <p className="text-blue-600 text-sm">Video: {b.VideoUrl}</p>
+              )}
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleEdit(b)}
+                className="bg-yellow-500 text-white p-2 rounded hover:bg-yellow-600 transition"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => handleDelete(b.BlogId)}
+                className="bg-red-600 text-white p-2 rounded hover:bg-red-700 transition"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }

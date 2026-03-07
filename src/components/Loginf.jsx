@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Login({ setToken }) {
+  const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -15,28 +16,26 @@ export default function Login({ setToken }) {
     setLoading(true);
 
     try {
-      const res = await fetch(
-        "https://forthub-backendapi-production.up.railway.app/api/login",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, password }),
+      const res = await fetch("http://localhost:5000/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({ username, password }),
+      });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data || "Login failed");
-        setLoading(false);
+        setError(data.message || "Invalid username or password");
         return;
       }
 
       localStorage.setItem("token", data.token);
       setToken(data.token);
-      navigate("/");
+
+      navigate("/dashboard");
     } catch (err) {
-      console.error(err);
       setError("Server error, try again.");
     } finally {
       setLoading(false);
@@ -80,18 +79,23 @@ export default function Login({ setToken }) {
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700">
-              Password
-            </label>
+          <div className="relative">
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full px-4 py-2 border rounded-lg pr-12"
               placeholder="Enter your password"
               required
             />
+
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-900"
+            >
+              {showPassword ? "👁️" : "🙈"}
+            </button>
           </div>
 
           <button

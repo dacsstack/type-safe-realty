@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, FC } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import About from "./components/About";
@@ -16,8 +16,8 @@ import LandingPage from "./pages/LandingPage";
 import ProjectDetails from "./pages/ProjectDetails";
 import ProtectedRoute from "./ProtectedRoute";
 
-function App() {
-  const [token, setToken] = useState(localStorage.getItem("token"));
+const App: FC = () => {
+  const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
 
   return (
     <BrowserRouter>
@@ -48,6 +48,6 @@ function App() {
       </Routes>
     </BrowserRouter>
   );
-}
+};
 
 export default App;

@@ -1,17 +1,18 @@
 import { Component } from "react";
 import { variables } from "../Variables.jsx";
 
-export default class Employee extends Component {
+export default class Banner extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      departments: [],
-      employees: [],
+      features: [],
+      about: [],
       modalTitle: "",
-      EmployeeId: 0,
-      EmployeeName: "",
-      Department: "",
+      AboutId: 0,
+      Title: "",
+      Feature: "",
+      Description: "",
       DateOfJoining: "",
       PhotoFileName: [], // always array
       PhotoPath: variables.PHOTO_URL,
@@ -29,36 +30,36 @@ export default class Employee extends Component {
     return token;
   }
 
-  // Fetch employees & departments
+  // Fetch About
   refreshList() {
     const token = this.getToken();
     if (!token) return;
 
-    // Employees
-    fetch(variables.API_URL + "employee", {
+    // Banners
+    fetch(variables.API_URL + "about", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {
-        if (!res.ok) throw new Error("Employee fetch error: " + res.status);
+        if (!res.ok) throw new Error("Banner fetch error: " + res.status);
         return res.json();
       })
       .then((data) => {
-        if (Array.isArray(data)) this.setState({ employees: data });
-        else this.setState({ employees: [] });
+        if (Array.isArray(data)) this.setState({ about: data });
+        else this.setState({ about: [] });
       })
       .catch((err) => console.error(err));
 
-    // Departments
-    fetch(variables.API_URL + "department", {
+    // ABOUT
+    fetch(variables.API_URL + "features", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {
-        if (!res.ok) throw new Error("Department fetch error: " + res.status);
+        if (!res.ok) throw new Error("About fetch error: " + res.status);
         return res.json();
       })
       .then((data) => {
-        if (Array.isArray(data)) this.setState({ departments: data });
-        else this.setState({ departments: [] });
+        if (Array.isArray(data)) this.setState({ features: data });
+        else this.setState({ features: [] });
       })
       .catch((err) => console.error(err));
   }
@@ -68,45 +69,48 @@ export default class Employee extends Component {
   }
 
   // Form handlers
-  changeEmployeeName = (e) => this.setState({ EmployeeName: e.target.value });
-  changeDepartment = (e) => this.setState({ Department: e.target.value });
+  changeTitle = (e) => this.setState({ Title: e.target.value });
+  changeFeature = (e) => this.setState({ Feature: e.target.value });
+  changeDescription = (e) => this.setState({ Description: e.target.value });
   changeDateOfJoining = (e) => this.setState({ DateOfJoining: e.target.value });
 
   // Modal actions
   addClick() {
     this.setState({
-      modalTitle: "Add Property",
-      EmployeeId: 0,
-      EmployeeName: "",
-      Department: "",
+      modalTitle: "Add Feature",
+      AboutId: 0,
+      Title: "",
+      Feature: "",
+      Description: "",
       DateOfJoining: "",
       PhotoFileName: [],
     });
   }
 
-  editClick(emp) {
-    const photos = emp.PhotoFileName
-      ? typeof emp.PhotoFileName === "string"
-        ? emp.PhotoFileName.split(",")
-        : emp.PhotoFileName
+  editClick(fea) {
+    const photos = fea.PhotoFileName
+      ? typeof fea.PhotoFileName === "string"
+        ? fea.PhotoFileName.split(",")
+        : fea.PhotoFileName
       : [];
 
     this.setState({
-      modalTitle: "Edit Property",
-      EmployeeId: emp.EmployeeId,
-      EmployeeName: emp.EmployeeName,
-      Department: emp.Department,
-      DateOfJoining: emp.DateOfJoining,
+      modalTitle: "Edit Feature",
+      AboutId: fea.AboutId,
+      Title: fea.Title,
+      Feature: fea.Feature,
+      Description: fea.Description,
+      DateOfJoining: fea.DateOfJoining,
       PhotoFileName: photos,
     });
   }
 
-  // Create Employee
+  // Create Feature
   createClick() {
     const token = this.getToken();
     if (!token) return;
 
-    fetch(variables.API_URL + "employee", {
+    fetch(variables.API_URL + "about", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -114,8 +118,9 @@ export default class Employee extends Component {
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        EmployeeName: this.state.EmployeeName,
-        Department: this.state.Department,
+        Title: this.state.Title,
+        Feature: this.state.Feature,
+        Description: this.state.Description,
         DateOfJoining: this.state.DateOfJoining,
         PhotoFileName: this.state.PhotoFileName.join(","), // save as comma string
       }),
@@ -130,7 +135,7 @@ export default class Employee extends Component {
       );
   }
 
-  // Update Employee
+  // Update Banner
   updateClick() {
     const token = this.getToken();
     if (!token) return;
@@ -139,7 +144,7 @@ export default class Employee extends Component {
       ? this.state.PhotoFileName.join(",")
       : this.state.PhotoFileName;
 
-    fetch(variables.API_URL + "employee", {
+    fetch(variables.API_URL + "about", {
       method: "PUT",
       headers: {
         Accept: "application/json",
@@ -147,9 +152,10 @@ export default class Employee extends Component {
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        EmployeeId: this.state.EmployeeId,
-        EmployeeName: this.state.EmployeeName,
-        Department: this.state.Department,
+        AboutId: this.state.AboutId,
+        Title: this.state.Title,
+        Feature: this.state.Feature,
+        Description: this.state.Description,
         DateOfJoining: this.state.DateOfJoining,
         PhotoFileName: photos,
       }),
@@ -164,14 +170,14 @@ export default class Employee extends Component {
       );
   }
 
-  // Delete Employee
+  // Delete Banner
   deleteClick(id) {
     const token = this.getToken();
     if (!token) return;
 
     if (!window.confirm("Are you sure?")) return;
 
-    fetch(variables.API_URL + "employee/" + id, {
+    fetch(variables.API_URL + "about/" + id, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -200,7 +206,7 @@ export default class Employee extends Component {
     }
 
     try {
-      const res = await fetch(variables.API_URL + "employee/savefile", {
+      const res = await fetch(variables.API_URL + "about/savefile", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -220,12 +226,13 @@ export default class Employee extends Component {
 
   render() {
     const {
-      departments,
-      employees,
+      features,
+      about,
       modalTitle,
-      EmployeeId,
-      EmployeeName,
-      Department,
+      AboutId,
+      Title,
+      Feature,
+      Description,
       DateOfJoining,
       PhotoPath,
       PhotoFileName,
@@ -235,12 +242,12 @@ export default class Employee extends Component {
       <div className="p-6">
         {/* HEADER */}
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Property</h2>
+          <h2 className="text-2xl font-bold">About</h2>
           <button
             onClick={() => this.addClick()}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow"
           >
-            + Add Property
+            + Add About
           </button>
         </div>
 
@@ -250,28 +257,30 @@ export default class Employee extends Component {
             <thead className="bg-gray-100 uppercase text-xs text-gray-600">
               <tr>
                 <th className="px-6 py-3">ID</th>
-                <th className="px-6 py-3">Name</th>
-                <th className="px-6 py-3">Department</th>
+                <th className="px-6 py-3">Title</th>
+                <th className="px-6 py-3">Developer</th>
+                <th className="px-6 py-3">Description</th>
                 <th className="px-6 py-3">Date</th>
                 <th className="px-6 py-3 text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y">
-              {employees.map((emp) => (
-                <tr key={emp.EmployeeId} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">{emp.EmployeeId}</td>
-                  <td className="px-6 py-4">{emp.EmployeeName}</td>
-                  <td className="px-6 py-4">{emp.Department}</td>
-                  <td className="px-6 py-4">{emp.DateOfJoining}</td>
+              {about.map((fea) => (
+                <tr key={fea.AboutId} className="hover:bg-gray-50">
+                  <td className="px-6 py-4">{fea.AboutId}</td>
+                  <td className="px-6 py-4">{fea.Title}</td>
+                  <td className="px-6 py-4">{fea.Feature}</td>
+                  <td className="px-6 py-4">{fea.Description}</td>
+                  <td className="px-6 py-4">{fea.DateOfJoining}</td>
                   <td className="px-6 py-4 flex justify-center gap-2">
                     <button
-                      onClick={() => this.editClick(emp)}
+                      onClick={() => this.editClick(fea)}
                       className="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-md"
                     >
                       Edit
                     </button>
                     <button
-                      onClick={() => this.deleteClick(emp.EmployeeId)}
+                      onClick={() => this.deleteClick(fea.AboutId)}
                       className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md"
                     >
                       Delete
@@ -284,34 +293,42 @@ export default class Employee extends Component {
         </div>
 
         {/* FORM */}
-        <div className="bg-white p-6 rounded-xl shadow max-w-4xl">
+        <div className="bg-white p-6 rounded-xl shadow max-w-8xl">
           <h3 className="text-lg font-semibold mb-6">{modalTitle}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* LEFT SIDE */}
             <div>
-              <label className="block text-sm font-medium mb-1">Name</label>
+              <label className="block text-sm font-medium mb-1">Title</label>
               <input
                 type="text"
-                value={EmployeeName}
-                onChange={this.changeEmployeeName}
+                value={Title}
+                onChange={this.changeTitle}
                 className="w-full border rounded-lg p-2 mb-4 focus:ring-2 focus:ring-blue-500 outline-none"
               />
 
-              <label className="block text-sm font-medium mb-1">
-                Department
-              </label>
+              <label className="block text-sm font-medium mb-1">Feature</label>
               <select
-                onChange={this.changeDepartment}
-                value={Department}
+                onChange={this.changeFeature}
+                value={Feature}
                 className="w-full border rounded-lg p-2 mb-4 focus:ring-2 focus:ring-blue-500 outline-none"
               >
-                <option value="">Select Department</option>
-                {departments.map((dep) => (
-                  <option key={dep.DepartmentId} value={dep.DepartmentName}>
-                    {dep.DepartmentName}
+                <option value="">Select Feature</option>
+                {features.map((feat) => (
+                  <option key={feat.FeatureId} value={feat.FeatureProfileName}>
+                    {feat.FeatureProfileName}
                   </option>
                 ))}
               </select>
+
+              <label className="block text-sm font-medium mb-1">
+                Description
+              </label>
+              <textarea
+                type="text"
+                value={Description}
+                onChange={this.changeDescription}
+                className="w-full border rounded-lg p-2 mb-4 focus:ring-2 focus:ring-blue-500 outline-none"
+              />
 
               <label className="block text-sm font-medium mb-1">Date</label>
               <input
@@ -329,7 +346,7 @@ export default class Employee extends Component {
                   <img
                     key={file}
                     src={PhotoPath + file}
-                    alt="Employee"
+                    alt="Banner"
                     className="w-32 h-32 object-cover rounded-lg shadow"
                   />
                 ))}
@@ -345,7 +362,7 @@ export default class Employee extends Component {
 
           {/* BUTTON */}
           <div className="mt-6">
-            {EmployeeId === 0 ? (
+            {AboutId === 0 ? (
               <button
                 onClick={() => this.createClick()}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"

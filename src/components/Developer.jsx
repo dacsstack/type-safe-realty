@@ -1,17 +1,17 @@
 import { Component } from "react";
 import { variables } from "../Variables.jsx";
 
-export default class Department extends Component {
+export default class Developer extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      departments: [],
-      departmentsWithoutFilter: [],
+      developers: [],
+      developersWithoutFilter: [],
       modalTitle: "",
-      DepartmentName: "",
-      DepartmentId: 0,
-      DepartmentIdFilter: "",
-      DepartmentNameFilter: "",
+      DeveloperName: "",
+      DeveloperId: 0,
+      DeveloperIdFilter: "",
+      DeveloperNameFilter: "",
     };
   }
 
@@ -19,48 +19,43 @@ export default class Department extends Component {
   // FILTER & SORT
   // =====================
   FilterFn() {
-    const {
-      DepartmentIdFilter,
-      DepartmentNameFilter,
-      departmentsWithoutFilter,
-    } = this.state;
-    const filtered = departmentsWithoutFilter.filter(
+    const { DeveloperIdFilter, DeveloperNameFilter, developersWithoutFilter } =
+      this.state;
+    const filtered = developersWithoutFilter.filter(
       (el) =>
-        el.DepartmentId.toString()
+        el.DeveloperId.toString()
           .toLowerCase()
-          .includes(DepartmentIdFilter.toLowerCase().trim()) &&
-        el.DepartmentName.toLowerCase().includes(
-          DepartmentNameFilter.toLowerCase().trim(),
+          .includes(DeveloperIdFilter.toLowerCase().trim()) &&
+        el.DeveloperName.toLowerCase().includes(
+          DeveloperNameFilter.toLowerCase().trim(),
         ),
     );
-    this.setState({ departments: filtered });
+    this.setState({ developers: filtered });
   }
 
   sortResult(prop, asc) {
-    const sorted = [...this.state.departmentsWithoutFilter].sort((a, b) => {
+    const sorted = [...this.state.developersWithoutFilter].sort((a, b) => {
       if (asc) return a[prop] > b[prop] ? 1 : a[prop] < b[prop] ? -1 : 0;
       else return b[prop] > a[prop] ? 1 : b[prop] < a[prop] ? -1 : 0;
     });
-    this.setState({ departments: sorted });
+    this.setState({ developers: sorted });
   }
 
-  changeDepartmentIdFilter = (e) => {
-    this.setState({ DepartmentIdFilter: e.target.value }, () =>
-      this.FilterFn(),
-    );
+  changeDeveloperIdFilter = (e) => {
+    this.setState({ DeveloperIdFilter: e.target.value }, () => this.FilterFn());
   };
-  changeDepartmentNameFilter = (e) => {
-    this.setState({ DepartmentNameFilter: e.target.value }, () =>
+  changeDeveloperNameFilter = (e) => {
+    this.setState({ DeveloperNameFilter: e.target.value }, () =>
       this.FilterFn(),
     );
   };
 
   // =====================
-  // FETCH DEPARTMENTS
+  // FETCH DEVELOPER
   // =====================
   async refreshList() {
     try {
-      const res = await fetch(variables.API_URL + "department", {
+      const res = await fetch(variables.API_URL + "developer", {
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
@@ -79,14 +74,14 @@ export default class Department extends Component {
 
       const data = await res.json();
       if (Array.isArray(data)) {
-        this.setState({ departments: data, departmentsWithoutFilter: data });
+        this.setState({ developers: data, developersWithoutFilter: data });
       } else {
         console.error("Invalid data format:", data);
-        this.setState({ departments: [] });
+        this.setState({ developers: [] });
       }
     } catch (err) {
       console.error("Fetch failed:", err);
-      this.setState({ departments: [] });
+      this.setState({ developers: [] });
     }
   }
 
@@ -97,22 +92,21 @@ export default class Department extends Component {
   // =====================
   // FORM CONTROL
   // =====================
-  changeDepartmentName = (e) =>
-    this.setState({ DepartmentName: e.target.value });
+  changeDeveloperName = (e) => this.setState({ DeveloperName: e.target.value });
 
   addClick() {
     this.setState({
       modalTitle: "Add Developer",
-      DepartmentId: 0,
-      DepartmentName: "",
+      DeveloperId: 0,
+      DeveloperName: "",
     });
   }
 
-  editClick(dep) {
+  editClick(dev) {
     this.setState({
       modalTitle: "Edit Developer",
-      DepartmentId: dep.DepartmentId,
-      DepartmentName: dep.DepartmentName,
+      DeveloperId: dev.DeveloperId,
+      DeveloperName: dev.DeveloperName,
     });
   }
 
@@ -121,14 +115,14 @@ export default class Department extends Component {
   // =====================
   async createClick() {
     try {
-      const res = await fetch(variables.API_URL + "department", {
+      const res = await fetch(variables.API_URL + "developer", {
         method: "POST",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
           Authorization: "Bearer " + localStorage.getItem("token"),
         },
-        body: JSON.stringify({ DepartmentName: this.state.DepartmentName }),
+        body: JSON.stringify({ DeveloperName: this.state.DeveloperName }),
       });
       const result = await res.json();
       alert(result.message);
@@ -140,7 +134,7 @@ export default class Department extends Component {
 
   async updateClick() {
     try {
-      const res = await fetch(variables.API_URL + "department", {
+      const res = await fetch(variables.API_URL + "developer", {
         method: "PUT",
         headers: {
           Accept: "application/json",
@@ -148,8 +142,8 @@ export default class Department extends Component {
           Authorization: "Bearer " + localStorage.getItem("token"),
         },
         body: JSON.stringify({
-          DepartmentId: this.state.DepartmentId,
-          DepartmentName: this.state.DepartmentName,
+          DeveloperId: this.state.DeveloperId,
+          DeveloperName: this.state.DeveloperName,
         }),
       });
       const result = await res.json();
@@ -163,7 +157,7 @@ export default class Department extends Component {
   async deleteClick(id) {
     if (!window.confirm("Are you sure?")) return;
     try {
-      const res = await fetch(variables.API_URL + "department/" + id, {
+      const res = await fetch(variables.API_URL + "developer/" + id, {
         method: "DELETE",
         headers: {
           Accept: "application/json",
@@ -183,8 +177,7 @@ export default class Department extends Component {
   // RENDER
   // =====================
   render() {
-    const { departments, modalTitle, DepartmentId, DepartmentName } =
-      this.state;
+    const { developers, modalTitle, DeveloperId, DeveloperName } = this.state;
 
     return (
       <div className="p-4">
@@ -210,19 +203,19 @@ export default class Department extends Component {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {departments.map((dep) => (
-                <tr key={dep.DepartmentId} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">{dep.DepartmentId}</td>
-                  <td className="px-6 py-4">{dep.DepartmentName}</td>
+              {developers.map((dev) => (
+                <tr key={dev.DeveloperId} className="hover:bg-gray-50">
+                  <td className="px-6 py-4">{dev.DeveloperId}</td>
+                  <td className="px-6 py-4">{dev.DeveloperName}</td>
                   <td className="px-6 py-4 flex justify-center gap-2">
                     <button
-                      onClick={() => this.editClick(dep)}
+                      onClick={() => this.editClick(dev)}
                       className="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-md"
                     >
                       Edit
                     </button>
                     <button
-                      onClick={() => this.deleteClick(dep.DepartmentId)}
+                      onClick={() => this.deleteClick(dev.DeveloperId)}
                       className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md"
                     >
                       Delete
@@ -235,16 +228,16 @@ export default class Department extends Component {
         </div>
 
         {/* SIMPLE FORM */}
-        <div className="mt-6 bg-white p-6 rounded-xl shadow max-w-md">
+        <div className="mt-6 bg-white p-6 rounded-xl shadow max-w-8xl">
           <h3 className="text-lg font-semibold mb-4">{modalTitle}</h3>
           <input
             type="text"
             placeholder="Developer Name"
-            value={DepartmentName}
-            onChange={this.changeDepartmentName}
+            value={DeveloperName}
+            onChange={this.changeDeveloperName}
             className="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          {DepartmentId === 0 ? (
+          {DeveloperId === 0 ? (
             <button
               onClick={() => this.createClick()}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"

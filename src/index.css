@@ -1,5 +1,14 @@
 @import "tailwindcss";
 /* Optional custom CSS */
-body {
+/* body {
   @apply bg-gray-50;
+} */
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-image: url("/grand-hyatt-manila.jpg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
 }
