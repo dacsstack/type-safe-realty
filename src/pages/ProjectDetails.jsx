@@ -11,7 +11,9 @@ export default function ProjectDetails() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:5000/api/project/${id}`)
+      .get(
+        `https://forthubapi-backend-production.up.railway.app/api/project/${id}`,
+      )
       .then((res) => {
         const data = res.data;
 

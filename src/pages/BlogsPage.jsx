@@ -33,7 +33,7 @@ export default function BlogsPage() {
               </div>
             ) : (
               <img
-                src={`http://localhost:5000/uploads/${b.Image}`}
+                src={`https://forthubapi-backend-production.up.railway.app/uploads/${b.Image}`}
                 alt={b.Title}
                 className="w-full h-52 object-cover"
               />

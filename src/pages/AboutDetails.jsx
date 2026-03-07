@@ -11,7 +11,9 @@ export default function AboutDetails() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:5000/api/about/${id}`)
+      .get(
+        `https://forthubapi-backend-production.up.railway.app/api/about/${id}`,
+      )
       .then((res) => {
         const data = res.data;
 

@@ -96,7 +96,7 @@ export default function WhatsAppChat() {
                 }`}
               >
                 <span
-                  className={`inline-block p-2 rounded-xl max-w-[75%] break-words ${
+                  className={`inline-block p-2 rounded-xl max-w-[75%] break-word ${
                     msg.type === "user"
                       ? "bg-green-500 text-white"
                       : "bg-gray-200 text-gray-800"

@@ -43,7 +43,7 @@ export default function LandingPage() {
       const query = new URLSearchParams(queryObj).toString();
 
       const res = await axios.get(
-        `http://localhost:5000/api/project${query ? "?" + query : ""}`,
+        `https://forthubapi-backend-production.up.railway.app/api/project${query ? "?" + query : ""}`,
       );
 
       setProjects(res.data);

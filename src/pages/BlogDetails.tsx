@@ -8,7 +8,9 @@ const BlogDetails: FC = () => {
   const [blogs, setBlogs] = useState<Blog | null>(null);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/blogs/${id}`)
+    fetch(
+      `https://forthubapi-backend-production.up.railway.app/api/blogs/${id}`,
+    )
       .then((res) => res.json())
       .then((data: Blog) => setBlogs(data));
   }, [id]);

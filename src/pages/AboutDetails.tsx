@@ -11,7 +11,9 @@ const AboutDetails: FC = () => {
   const [photos, setPhotos] = useState<string[]>([]);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/about/${id}`)
+    fetch(
+      `https://forthubapi-backend-production.up.railway.app/api/about/${id}`,
+    )
       .then((res) => res.json())
       .then((data: About) => {
         setAbout(data);
