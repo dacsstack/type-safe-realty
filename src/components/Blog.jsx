@@ -13,7 +13,9 @@ export default function BlogAdmin() {
   // Fetch blogs
   const fetchBlogs = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/blogs");
+      const res = await axios.get(
+        "https://forthubapi-backend-production.up.railway.app/api/blogs",
+      );
       setBlogs(res.data);
     } catch (err) {
       console.error(err);
