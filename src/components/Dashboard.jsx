@@ -13,17 +13,19 @@ export default function Dashboard() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/dashboard/stats")
+      .get(
+        "https://forthubapi-backend-production.up.railway.app/api/dashboard/stats",
+      )
       .then((res) => setStats(res.data))
       .catch(console.error);
 
     axios
-      .get("http://localhost:5000/api/project")
+      .get("https://forthubapi-backend-production.up.railway.app/api/project")
       .then((res) => setProjects(res.data))
       .catch(console.error);
 
     axios
-      .get("http://localhost:5000/api/inquiry")
+      .get("https://forthubapi-backend-production.up.railway.app/api/inquiry")
       .then((res) => setInquiries(res.data))
       .catch(console.error);
   }, []);

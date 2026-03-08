@@ -14,7 +14,9 @@ const BlogAdmin: FC = () => {
   // Fetch blogs
   const fetchBlogs = async () => {
     try {
-      const res = await axios.get<Blog[]>("http://localhost:5000/api/blogs");
+      const res = await axios.get<Blog[]>(
+        "https://forthubapi-backend-production.up.railway.app/api/blogs",
+      );
       setBlogs(res.data);
     } catch (err) {
       console.error(err);
@@ -30,11 +32,14 @@ const BlogAdmin: FC = () => {
     try {
       if (editing) {
         await axios.put(
-          `http://localhost:5000/api/blogs/${editing.BlogId}`,
+          `https://forthubapi-backend-production.up.railway.app/api/blogs/${editing.BlogId}`,
           form,
         );
       } else {
-        await axios.post("http://localhost:5000/api/blogs", form);
+        await axios.post(
+          "https://forthubapi-backend-production.up.railway.app/api/blogs",
+          form,
+        );
       }
       setForm({ Title: "", Description: "", VideoUrl: "" });
       setEditing(null);
@@ -48,7 +53,9 @@ const BlogAdmin: FC = () => {
   const handleDelete = async (id: number) => {
     if (!confirm("Are you sure you want to delete this blog?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/blogs/${id}`);
+      await axios.delete(
+        `https://forthubapi-backend-production.up.railway.app/api/blogs/${id}`,
+      );
       fetchBlogs();
     } catch (err) {
       console.error(err);
