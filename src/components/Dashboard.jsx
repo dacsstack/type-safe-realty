@@ -14,17 +14,17 @@ export default function Dashboard() {
 
   useEffect(() => {
     axios
-      .get(`${variables.API_URL}/developer/dashboard/stats`)
+      .get(`${variables.API_URL}/api/dashboard/stats`)
       .then((res) => setStats(res.data))
       .catch(console.error);
 
     axios
-      .get(`${variables.API_URL}/project`)
+      .get(`${variables.API_URL}/api/project`)
       .then((res) => setProjects(res.data))
       .catch(console.error);
 
     axios
-      .get(`${variables.API_URL}/inquiry`)
+      .get(`${variables.API_URL}/api/inquiry`)
       .then((res) => setInquiries(res.data))
       .catch(console.error);
   }, []);
