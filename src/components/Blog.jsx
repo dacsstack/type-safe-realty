@@ -31,7 +31,7 @@ export default function BlogAdmin() {
     try {
       if (editing) {
         await axios.put(
-          "https://forthubapi-backend-production.up.railway.app/api/blogs/${editing.BlogId}",
+          `https://forthubapi-backend-production.up.railway.app/api/blogs/${editing.BlogId}`,
           form,
         );
       } else {
