@@ -31,11 +31,14 @@ export default function BlogAdmin() {
     try {
       if (editing) {
         await axios.put(
-          `http://localhost:5000/api/blogs/${editing.BlogId}`,
+          "https://forthubapi-backend-production.up.railway.app/api/blogs/${editing.BlogId}",
           form,
         );
       } else {
-        await axios.post("http://localhost:5000/api/blogs", form);
+        await axios.post(
+          "https://forthubapi-backend-production.up.railway.app/api/blogs",
+          form,
+        );
       }
       setForm({ Title: "", Description: "", VideoUrl: "" });
       setEditing(null);
@@ -49,7 +52,9 @@ export default function BlogAdmin() {
   const handleDelete = async (id) => {
     if (!confirm("Are you sure you want to delete this blog?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/blogs/${id}`);
+      await axios.delete(
+        `https://forthubapi-backend-production.up.railway.app/api/blogs/${id}`,
+      );
       fetchBlogs();
     } catch (err) {
       console.error(err);
