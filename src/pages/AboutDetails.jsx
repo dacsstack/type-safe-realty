@@ -57,7 +57,7 @@ export default function AboutDetails() {
           {photos.map((photo, index) => (
             <img
               key={index}
-              src={`http://localhost:5000/Photos/${photo}`}
+              src={`https://forthubapi-backend-production.up.railway.app/Photos/${photo}`}
               className="w-full h-64 object-cover rounded shadow"
             />
           ))}

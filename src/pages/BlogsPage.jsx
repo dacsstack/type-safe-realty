@@ -9,7 +9,7 @@ export default function BlogsPage() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/blogs")
+      .get("https://forthubapi-backend-production.up.railway.app/api/blogs")
       .then((res) => setBlogs(res.data))
       .catch(console.error);
   }, []);

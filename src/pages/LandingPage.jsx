@@ -55,7 +55,9 @@ export default function LandingPage() {
 
     // ✅ If empty result, reload all projects
     if (!data || data.length === 0) {
-      const res = await axios.get("http://localhost:5000/api/project");
+      const res = await axios.get(
+        "https://forthubapi-backend-production.up.railway.app/api/project",
+      );
       setProjects(res.data);
     } else {
       setProjects(data);
@@ -68,17 +70,17 @@ export default function LandingPage() {
   useEffect(() => {
     // fetch projects from backend (public)
     axios
-      .get("http://localhost:5000/api/project")
+      .get("https://forthubapi-backend-production.up.railway.app/api/project")
       .then((res) => setProjects(res.data))
       .catch(console.error);
 
     axios
-      .get("http://localhost:5000/api/about")
+      .get("https://forthubapi-backend-production.up.railway.app/api/about")
       .then((res) => setAbout(res.data))
       .catch(console.error);
 
     axios
-      .get("http://localhost:5000/api/blogs")
+      .get("https://forthubapi-backend-production.up.railway.app/api/blogs")
       .then((res) => setBlogs(res.data))
       .catch(console.error);
   }, []);
@@ -303,7 +305,7 @@ export default function LandingPage() {
 
                 const firstPhoto =
                   photos.length > 0
-                    ? `http://localhost:5000/Photos/${photos[0]}`
+                    ? `https://forthubapi-backend-production.up.railway.app/Photos/${photos[0]}`
                     : "/dummy/thumb-1.jpg";
 
                 return (
@@ -349,7 +351,7 @@ export default function LandingPage() {
 
               const firstPhoto =
                 photos.length > 0
-                  ? `http://localhost:5000/Photos/${photos[0]}`
+                  ? `https://forthubapi-backend-production.up.railway.app/Photos/${photos[0]}`
                   : "/dummy/thumb-1.jpg";
 
               return (
@@ -419,7 +421,7 @@ export default function LandingPage() {
                   </div>
                 ) : (
                   <img
-                    src={`http://localhost:5000/uploads/${b.Image}`}
+                    src={`https://forthubapi-backend-production.up.railway.app/uploads/${b.Image}`}
                     alt={b.Title}
                     className="w-full h-52 object-cover transform transition-transform duration-500 group-hover:scale-105"
                   />
