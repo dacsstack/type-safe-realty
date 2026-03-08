@@ -2,6 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 
 export default function BlogAdmin() {
+  const API = "https://forthubapi-backend-production.up.railway.app/api";
   const [blogs, setBlogs] = useState([]);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({
@@ -13,9 +14,7 @@ export default function BlogAdmin() {
   // Fetch blogs
   const fetchBlogs = async () => {
     try {
-      const res = await axios.get(
-        "https://forthubapi-backend-production.up.railway.app/api/blogs",
-      );
+      const res = await axios.get(`${API}/blogs`);
       setBlogs(res.data);
     } catch (err) {
       console.error(err);
@@ -30,15 +29,9 @@ export default function BlogAdmin() {
   const handleSubmit = async () => {
     try {
       if (editing) {
-        await axios.put(
-          `https://forthubapi-backend-production.up.railway.app/api/blogs/${editing.BlogId}`,
-          form,
-        );
+        await axios.put(`${API}/blogs/${editing.BlogId}`, form);
       } else {
-        await axios.post(
-          "https://forthubapi-backend-production.up.railway.app/api/blogs",
-          form,
-        );
+        await axios.post(`${API}/blogs`, form);
       }
       setForm({ Title: "", Description: "", VideoUrl: "" });
       setEditing(null);
@@ -52,9 +45,7 @@ export default function BlogAdmin() {
   const handleDelete = async (id) => {
     if (!confirm("Are you sure you want to delete this blog?")) return;
     try {
-      await axios.delete(
-        `https://forthubapi-backend-production.up.railway.app/api/blogs/${id}`,
-      );
+      await axios.delete(`${API}/blogs/${id}`);
       fetchBlogs();
     } catch (err) {
       console.error(err);
