@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { variables } from "../Variables.jsx";
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
