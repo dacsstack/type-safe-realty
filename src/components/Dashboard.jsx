@@ -1,6 +1,5 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { variables } from "../Variables.jsx";
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
@@ -12,19 +11,29 @@ export default function Dashboard() {
   const [projects, setProjects] = useState([]);
   const [inquiries, setInquiries] = useState([]);
 
+  const API = axios.create({
+    baseURL: "https://forthubapi-backend-production.up.railway.app/api",
+  });
+
+  API.interceptors.request.use((config) => {
+    const token = localStorage.getItem("token");
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    return config;
+  });
+
   useEffect(() => {
-    axios
-      .get(`${variables.API_URL}/api/dashboard/stats`)
+    API;
+    API.get("/dashboard/stats")
       .then((res) => setStats(res.data))
       .catch(console.error);
 
-    axios
-      .get(`${variables.API_URL}/api/project`)
+    API;
+    API.get("/project")
       .then((res) => setProjects(res.data))
       .catch(console.error);
 
-    axios
-      .get(`${variables.API_URL}/api/inquiry`)
+    API;
+    API.get("/inquiry")
       .then((res) => setInquiries(res.data))
       .catch(console.error);
   }, []);
