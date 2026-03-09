@@ -22,20 +22,22 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
-    API;
-    API.get("/dashboard/stats")
-      .then((res) => setStats(res.data))
-      .catch(console.error);
+    const fetchData = async () => {
+      try {
+        const statsRes = await API.get("/dashboard/stats");
+        setStats(statsRes.data);
 
-    API;
-    API.get("/project")
-      .then((res) => setProjects(res.data))
-      .catch(console.error);
+        const projectRes = await API.get("/project");
+        setProjects(projectRes.data);
 
-    API;
-    API.get("/inquiry")
-      .then((res) => setInquiries(res.data))
-      .catch(console.error);
+        const inquiryRes = await API.get("/inquiry");
+        setInquiries(inquiryRes.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
   }, []);
 
   return (
