@@ -99,7 +99,8 @@ export default function Dashboard() {
             </thead>
 
             <tbody>
-              {inquiries.slice(0, 5).map((i) => (
+              {/*LIMIT {inquiries.slice(0, 5).map((i) */}
+              {inquiries.map((i) => (
                 <tr key={i.InquiryId} className="border-b">
                   <td className="p-2">{i.Name}</td>
                   <td className="p-2">{i.Email}</td>
