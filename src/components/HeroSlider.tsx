@@ -36,7 +36,7 @@ export default function HeroSlider() {
 
   // ✅ FETCH banners
   useEffect(() => {
-    fetch("http://localhost:5000/api/banner")
+    fetch("https://forthubapi-backend-production.up.railway.app/api/banner")
       .then((res) => res.json())
       .then((data: Slide[]) => setSlides(data))
       .catch((err) => console.error("Banner fetch error:", err));
@@ -58,13 +58,16 @@ export default function HeroSlider() {
     e.preventDefault();
 
     try {
-      const res = await fetch("http://localhost:5000/api/inquiry", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const res = await fetch(
+        "https://forthubapi-backend-production.up.railway.app/api/inquiry",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(form),
         },
-        body: JSON.stringify(form),
-      });
+      );
 
       const data = await res.json();
 
@@ -92,15 +95,15 @@ export default function HeroSlider() {
   const slide = slides[current];
 
   const bgImage = slide.PhotoFileName
-    ? `url(http://localhost:5000/Photos/${slide.PhotoFileName})`
-    : `url(/dummy/placeholder.jpg)`;
+    ? `url(https://forthubapi-backend-production.up.railway.app/Photos/${slide.PhotoFileName})`
+    : `url(https://forthubapi-backend-production.up.railway.app/dummy/placeholder.jpg)`;
 
   return (
     <section
       id="home"
-      className="relative h-[650px] bg-cover bg-center transition-all duration-700 transform hover:scale-105"
+      className="relative h-162.5 bg-cover bg-center transition-all duration-700 transform hover:scale-105"
       style={{
-        backgroundImage: `url(${slide.PhotoFileName ? `http://localhost:5000/Photos/${slide.PhotoFileName}` : "/dummy/placeholder.jpg"})`,
+        backgroundImage: `url(${slide.PhotoFileName ? `https://forthubapi-backend-production.up.railway.app/Photos/${slide.PhotoFileName}` : "https://forthubapi-backend-production.up.railway.app/dummy/placeholder.jpg"})`,
       }}
     >
       {/* Dark overlay */}
