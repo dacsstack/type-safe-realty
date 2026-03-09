@@ -14,7 +14,6 @@ interface InquiryForm {
 }
 
 export default function HeroSlider() {
-  const API = "https://forthubapi-backend-production.up.railway.app/api";
   const [slides, setSlides] = useState<Slide[]>([]);
   const [current, setCurrent] = useState<number>(0);
 
@@ -37,7 +36,7 @@ export default function HeroSlider() {
 
   // ✅ FETCH banners
   useEffect(() => {
-    fetch(`${API}/banner`)
+    fetch("https://forthubapi-backend-production.up.railway.app/api/banner")
       .then((res) => res.json())
       .then((data: Slide[]) => setSlides(data))
       .catch((err) => console.error("Banner fetch error:", err));
@@ -59,13 +58,16 @@ export default function HeroSlider() {
     e.preventDefault();
 
     try {
-      const res = await fetch(`${API}/inquiry`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const res = await fetch(
+        "https://forthubapi-backend-production.up.railway.app/api/inquiry",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(form),
         },
-        body: JSON.stringify(form),
-      });
+      );
 
       const data = await res.json();
 
@@ -100,7 +102,9 @@ export default function HeroSlider() {
     <section
       id="home"
       className="relative h-162.5 bg-cover bg-center transition-all duration-700 transform hover:scale-105"
-      style={{ backgroundImage: `url(${bgImage})` }}
+      style={{
+        backgroundImage: `url(${slide.PhotoFileName ? `https://forthubapi-backend-production.up.railway.app/Photos/${slide.PhotoFileName}` : "https://forthubapi-backend-production.up.railway.app/dummy/placeholder.jpg"})`,
+      }}
     >
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-black/50"></div>

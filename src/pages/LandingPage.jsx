@@ -6,9 +6,6 @@ import WhatsAppChat from "../components/WhatsAppChat";
 
 export default function LandingPage() {
   const navigate = useNavigate();
-  const API = "https://forthubapi-backend-production.up.railway.app/api";
-  const PHOTO_URL =
-    "https://forthubapi-backend-production.up.railway.app/Photos";
   const [menuOpen, setMenuOpen] = useState(false);
   const [showAllBlogs, setShowAllBlogs] = useState(false);
   const [projects, setProjects] = useState([]);
@@ -31,10 +28,12 @@ export default function LandingPage() {
     }
   };
 
-  const fetchFilteredProjects = async (overrideFilters = {}, scroll = true) => {
+  const fetchFilteredProjects = async (overrideFilters = {}) => {
     try {
+      // Merge current filters with optional overrides (used for featured projects clicks)
       const currentFilters = { ...filters, ...overrideFilters };
 
+      // Only send non-empty filters
       const queryObj = {};
       if (currentFilters.location) queryObj.location = currentFilters.location;
       if (currentFilters.type) queryObj.type = currentFilters.type;
@@ -47,20 +46,21 @@ export default function LandingPage() {
         `https://forthubapi-backend-production.up.railway.app/api/project${query ? "?" + query : ""}`,
       );
 
-      const data = res.data;
-
-      if (!data || data.length === 0) {
-        const fallback = await axios.get(
-          "https://forthubapi-backend-production.up.railway.app/api/project",
-        );
-        setProjects(fallback.data);
-      } else {
-        setProjects(data);
-      }
-
+      setProjects(res.data);
+      // ✅ scroll to projects section after fetching
       if (scroll) scrollToSection("projects");
     } catch (err) {
       console.error("Error fetching projects:", err);
+    }
+
+    // ✅ If empty result, reload all projects
+    if (!data || data.length === 0) {
+      const res = await axios.get(
+        "https://forthubapi-backend-production.up.railway.app/api/project",
+      );
+      setProjects(res.data);
+    } else {
+      setProjects(data);
     }
   };
   const handleFeaturedClick = (locationName) => {
@@ -68,23 +68,21 @@ export default function LandingPage() {
     setFilters((prev) => ({ ...prev, location: locationName }));
   };
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [projectsRes, aboutRes, blogsRes] = await Promise.all([
-          axios.get(`${API}/project`),
-          axios.get(`${API}/about`),
-          axios.get(`${API}/blogs`),
-        ]);
+    // fetch projects from backend (public)
+    axios
+      .get("https://forthubapi-backend-production.up.railway.app/api/project")
+      .then((res) => setProjects(res.data))
+      .catch(console.error);
 
-        setProjects(projectsRes.data);
-        setAbout(aboutRes.data);
-        setBlogs(blogsRes.data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
+    axios
+      .get("https://forthubapi-backend-production.up.railway.app/api/about")
+      .then((res) => setAbout(res.data))
+      .catch(console.error);
 
-    fetchData();
+    axios
+      .get("https://forthubapi-backend-production.up.railway.app/api/blogs")
+      .then((res) => setBlogs(res.data))
+      .catch(console.error);
   }, []);
 
   return (
@@ -283,20 +281,6 @@ export default function LandingPage() {
               Search
             </button>
           </div>
-          <button
-            onClick={() => {
-              setFilters({
-                location: "",
-                type: "",
-                minPrice: "",
-                maxPrice: "",
-              });
-              fetchFilteredProjects({});
-            }}
-            className="bg-gray-600 text-white rounded-lg px-4"
-          >
-            Reset
-          </button>
           <h2 className="text-3xl font-bold mb-8 text-white">
             Our Accredited Projects
           </h2>
@@ -545,6 +529,7 @@ export default function LandingPage() {
               <li>
                 <button
                   onClick={() => scrollToSection("projects")}
+                  s
                   className="hover:text-white transition"
                 >
                   Our Projects
