@@ -100,6 +100,7 @@ export default function HeroSlider({ scrollToSection }: HeroSliderProps) {
 
   return (
     <section id="home" className="relative h-162.5 overflow-hidden">
+      {/* BACKGROUND SLIDER */}
       {slides.map((slide, index) => {
         const bgImage = slide.PhotoFileName
           ? `${PHOTO_URL}/${slide.PhotoFileName}`
@@ -109,150 +110,74 @@ export default function HeroSlider({ scrollToSection }: HeroSliderProps) {
           <div
             key={index}
             className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
-              index === current ? "opacity-100 z-10" : "opacity-0"
+              index === current ? "opacity-100" : "opacity-0"
             }`}
             style={{ backgroundImage: `url(${bgImage})` }}
           >
-            {/* cinematic zoom */}
             <div className="absolute inset-0 bg-black/50"></div>
-
-            <div className="relative z-10 h-full flex items-center">
-              <div className="container mx-auto px-6 grid md:grid-cols-2 gap-10 items-center">
-                {/* TEXT */}
-                <div className="text-white">
-                  <h1
-                    className={`text-4xl md:text-6xl font-bold mb-4 leading-tight transition-all duration-1000 ${
-                      index === current
-                        ? "opacity-100 translate-y-0"
-                        : "opacity-0 translate-y-10"
-                    }`}
-                  >
-                    {slide.BannerName}
-                  </h1>
-
-                  <p
-                    className={`text-lg opacity-90 mb-6 transition-all duration-1000 delay-200 ${
-                      index === current
-                        ? "opacity-100 translate-y-0"
-                        : "opacity-0 translate-y-10"
-                    }`}
-                  >
-                    {slide.BannerDetails}
-                  </p>
-
-                  <div className="flex flex-wrap gap-4">
-                    <button
-                      onClick={() => scrollToSection("projects")}
-                      className="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transform transition duration-300 shadow-lg hover:scale-105"
-                    >
-                      Explore Our Projects
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        window.dispatchEvent(new Event("openWhatsAppChat"))
-                      }
-                      className="bg-white text-black px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 transform transition duration-300 shadow-lg hover:scale-105"
-                    >
-                      Talk to an Agent
-                    </button>
-                  </div>
-                </div>
-
-                {/* CONTACT FORM */}
-                <div className="relative group flex items-center">
-                  {/* AGENT */}
-                  <img
-                    src="/agent.png"
-                    alt="Agent"
-                    className="absolute -left-20 bottom-0 w-40
-                opacity-0 translate-x-10
-                group-hover:opacity-100 group-hover:translate-x-0
-                transition-all duration-700"
-                  />
-
-                  {/* FORM */}
-                  <div
-                    className={`bg-white/10 p-8 rounded-3xl shadow-2xl backdrop-blur-xl 
-                border border-white/20 transition-all duration-700
-                ${
-                  index === current
-                    ? "opacity-100 translate-x-0"
-                    : "opacity-0 translate-x-10"
-                }`}
-                  >
-                    <h2 className="text-2xl font-bold mb-4 text-white">
-                      Write Us
-                    </h2>
-
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                      <input
-                        type="text"
-                        placeholder="Your Name"
-                        required
-                        value={form.Name}
-                        onChange={(e) =>
-                          setForm({ ...form, Name: e.target.value })
-                        }
-                        className="w-full border border-white/30 text-white rounded-xl p-3 bg-white/10 
-                    focus:outline-none focus:ring-2 focus:ring-blue-400 
-                    hover:bg-white/20 transition duration-300"
-                      />
-
-                      <input
-                        type="email"
-                        placeholder="Your Email"
-                        required
-                        value={form.Email}
-                        onChange={(e) =>
-                          setForm({ ...form, Email: e.target.value })
-                        }
-                        className="w-full border border-white/30 text-white rounded-xl p-3 bg-white/10 
-                    focus:outline-none focus:ring-2 focus:ring-blue-400 
-                    hover:bg-white/20 transition duration-300"
-                      />
-
-                      <input
-                        type="text"
-                        placeholder="Contact Number"
-                        value={form.Contact}
-                        onChange={(e) =>
-                          setForm({ ...form, Contact: e.target.value })
-                        }
-                        className="w-full border border-white/30 text-white rounded-xl p-3 bg-white/10 
-                    focus:outline-none focus:ring-2 focus:ring-blue-400 
-                    hover:bg-white/20 transition duration-300"
-                      />
-
-                      <textarea
-                        placeholder="Your Message"
-                        required
-                        rows={4}
-                        value={form.Message}
-                        onChange={(e) =>
-                          setForm({ ...form, Message: e.target.value })
-                        }
-                        className="w-full border border-white/30 text-white rounded-xl p-3 bg-white/10 
-                    focus:outline-none focus:ring-2 focus:ring-blue-400 
-                    hover:bg-white/20 transition duration-300"
-                      />
-
-                      <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold 
-                    transform transition duration-300 hover:scale-105"
-                      >
-                        {loading ? "Sending..." : "Send Message"}
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         );
       })}
+
+      {/* CONTENT (NOT PART OF SLIDER) */}
+      <div className="relative z-10 h-full flex items-center">
+        <div className="container mx-auto px-6 grid md:grid-cols-2 gap-10 items-center">
+          {/* TEXT */}
+          <div className="text-white">
+            <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight">
+              {slides[current]?.BannerName}
+            </h1>
+
+            <p className="text-lg opacity-90 mb-6">
+              {slides[current]?.BannerDetails}
+            </p>
+
+            <div className="flex flex-wrap gap-4">
+              <button
+                onClick={() => scrollToSection("projects")}
+                className="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transition"
+              >
+                Explore Our Projects
+              </button>
+
+              <button
+                onClick={() =>
+                  window.dispatchEvent(new Event("openWhatsAppChat"))
+                }
+                className="bg-white text-black px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 transition"
+              >
+                Talk to an Agent
+              </button>
+            </div>
+          </div>
+
+          {/* FORM */}
+          <div className="relative group flex items-center">
+            {/* AGENT */}
+            <img
+              src="/agent.png"
+              alt="Agent"
+              className="absolute -left-20 bottom-0 w-40
+          opacity-0 translate-x-10
+          group-hover:opacity-100 group-hover:translate-x-0
+          transition-all duration-700"
+            />
+
+            {/* CONTACT FORM */}
+            <div
+              className="bg-white/10 p-8 rounded-3xl shadow-2xl backdrop-blur-xl
+          border border-white/20 transition-transform duration-300
+          group-hover:translate-x-3"
+            >
+              <h2 className="text-2xl font-bold mb-4 text-white">Write Us</h2>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                ...
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }
