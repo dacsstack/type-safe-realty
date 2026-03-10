@@ -160,7 +160,7 @@ export default function HeroSlider({ scrollToSection }: HeroSliderProps) {
             <img
               src="/agent.png"
               alt="Agent"
-              className="hidden md:block absolute -left-50 bottom-0 w-60 h-auto opacity-0 
+              className="hidden md:block absolute -left-55 bottom-0 w-60 h-auto opacity-0 
              translate-x-16 group-hover:opacity-100 group-hover:translate-x-0
              transition-all duration-700"
             />
