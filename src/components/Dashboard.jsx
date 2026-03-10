@@ -87,7 +87,8 @@ export default function Dashboard() {
           </thead>
 
           <tbody>
-            {projects.slice(0, 5).map((p) => (
+            {/* {projects.slice(0, 5).map((p) => ( */}
+            {projects.map((p) => (
               <tr key={p.ProjectId} className="border-b">
                 <td className="p-2">{p.ProjectName}</td>
                 <td className="p-2">{p.Developer}</td>
