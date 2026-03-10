@@ -99,7 +99,7 @@ export default function HeroSlider({ scrollToSection }: HeroSliderProps) {
     : "/dummy/placeholder.jpg";
 
   return (
-    <section id="home" className="relative h-162.5 overflow-hidden">
+    <section id="home" className="relative min-h-screen overflow-hidden">
       {/* BACKGROUND SLIDER */}
       {slides.map((slide, index) => {
         const bgImage = slide.PhotoFileName
@@ -121,7 +121,7 @@ export default function HeroSlider({ scrollToSection }: HeroSliderProps) {
 
       {/* CONTENT (NOT PART OF SLIDER) */}
       <div className="relative z-10 h-full flex items-center">
-        <div className="container mx-auto px-6 grid md:grid-cols-2 gap-10 items-center">
+        <div className="container mx-auto px-6 py-20 grid md:grid-cols-2 gap-10 items-center">
           {/* TEXT */}
           <div className="text-white">
             <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight">
@@ -157,18 +157,11 @@ export default function HeroSlider({ scrollToSection }: HeroSliderProps) {
             <img
               src="/agent.png"
               alt="Agent"
-              className="absolute -left-20 bottom-0 w-40
-          opacity-0 translate-x-10
-          group-hover:opacity-100 group-hover:translate-x-0
-          transition-all duration-700"
+              className="hidden md:block absolute -left-20 bottom-0 w-40 opacity-0 translate-x-10 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-700"
             />
 
             {/* CONTACT FORM */}
-            <div
-              className="bg-white/10 p-8 rounded-3xl shadow-2xl backdrop-blur-xl
-          border border-white/20 transition-transform duration-300
-          group-hover:translate-x-3"
-            >
+            <div className="bg-white/10 p-6 md:p-8 rounded-3xl shadow-2xl backdrop-blur-xl border border-white/20 w-full">
               <h2 className="text-2xl font-bold mb-4 text-white">Write Us</h2>
 
               <form onSubmit={handleSubmit} className="space-y-4">
