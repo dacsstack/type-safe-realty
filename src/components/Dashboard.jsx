@@ -21,6 +21,20 @@ export default function Dashboard() {
     return config;
   });
 
+  const deleteInquiry = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this inquiry?"))
+      return;
+
+    try {
+      await API.delete(`/inquiry/${id}`);
+
+      // remove from UI
+      setInquiries(inquiries.filter((i) => i.InquiryId !== id));
+    } catch (error) {
+      console.error("Delete error:", error);
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -95,6 +109,7 @@ export default function Dashboard() {
                 <th className="text-left p-2">Email</th>
                 <th className="text-left p-2">Contact</th>
                 <th className="text-left p-2">Message</th>
+                <th className="text-left p-2">Action</th>
               </tr>
             </thead>
 
@@ -106,6 +121,15 @@ export default function Dashboard() {
                   <td className="p-2">{i.Email}</td>
                   <td className="p-2">{i.Contact}</td>
                   <td className="p-2">{i.Message}</td>
+
+                  <td className="p-2">
+                    <button
+                      onClick={() => deleteInquiry(i.InquiryId)}
+                      className="bg-red-600 text-white px-3 py-1 rounded"
+                    >
+                      Delete
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
