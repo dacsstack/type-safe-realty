@@ -52,7 +52,7 @@ export default function HeroSlider({ scrollToSection }: HeroSliderProps) {
     return () => clearInterval(interval);
   }, [slides]);
 
-  // SUBMIT INQUIRY
+  // SUBMIT FORM
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -90,14 +90,7 @@ export default function HeroSlider({ scrollToSection }: HeroSliderProps) {
     setLoading(false);
   };
 
-  // LOADING SCREEN
-  if (slides.length === 0) {
-    return (
-      <div className="h-162.5 flex items-center justify-center bg-black text-white">
-        Loading banners...
-      </div>
-    );
-  }
+  if (slides.length === 0) return null;
 
   const slide = slides[current];
 
@@ -108,10 +101,10 @@ export default function HeroSlider({ scrollToSection }: HeroSliderProps) {
   return (
     <section
       id="home"
-      className="relative h-162.5 bg-cover bg-center transition-opacity duration-1000"
+      className="relative h-162.5 bg-cover bg-center transition-all duration-700 transform hover:scale-105"
       style={{ backgroundImage: `url(${bgImage})` }}
     >
-      {/* DARK OVERLAY */}
+      {/* Dark overlay */}
       <div className="absolute inset-0 bg-black/50"></div>
 
       <div className="relative z-10 h-full flex items-center">
@@ -127,7 +120,7 @@ export default function HeroSlider({ scrollToSection }: HeroSliderProps) {
             <div className="flex flex-wrap gap-4">
               <button
                 onClick={() => scrollToSection("projects")}
-                className="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transition transform hover:scale-105 shadow-lg"
+                className="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transform transition duration-300 shadow-lg hover:scale-105"
               >
                 Explore Our Projects
               </button>
@@ -136,7 +129,7 @@ export default function HeroSlider({ scrollToSection }: HeroSliderProps) {
                 onClick={() =>
                   window.dispatchEvent(new Event("openWhatsAppChat"))
                 }
-                className="bg-white text-black px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 transition transform hover:scale-105 shadow-lg"
+                className="bg-white text-black px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 transform transition duration-300 shadow-lg hover:scale-105"
               >
                 Talk to an Agent
               </button>
@@ -144,7 +137,7 @@ export default function HeroSlider({ scrollToSection }: HeroSliderProps) {
           </div>
 
           {/* RIGHT FORM */}
-          <div className="bg-white/10 p-8 rounded-3xl shadow-2xl backdrop-blur-xl border border-white/20">
+          <div className="bg-white/10 p-8 rounded-3xl shadow-2xl backdrop-blur-xl border border-white/20 transition-transform duration-300 transform hover:scale-105">
             <h2 className="text-2xl font-bold mb-4 text-white">Write Us</h2>
 
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -155,7 +148,8 @@ export default function HeroSlider({ scrollToSection }: HeroSliderProps) {
                 value={form.Name}
                 onChange={(e) => setForm({ ...form, Name: e.target.value })}
                 className="w-full border border-white/30 text-white rounded-xl p-3 bg-white/10 
-                focus:outline-none focus:ring-2 focus:ring-blue-400"
+                focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white/20 
+                hover:bg-white/20 transition duration-300"
               />
 
               <input
@@ -165,7 +159,8 @@ export default function HeroSlider({ scrollToSection }: HeroSliderProps) {
                 value={form.Email}
                 onChange={(e) => setForm({ ...form, Email: e.target.value })}
                 className="w-full border border-white/30 text-white rounded-xl p-3 bg-white/10 
-                focus:outline-none focus:ring-2 focus:ring-blue-400"
+                focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white/20 
+                hover:bg-white/20 transition duration-300"
               />
 
               <input
@@ -174,7 +169,8 @@ export default function HeroSlider({ scrollToSection }: HeroSliderProps) {
                 value={form.Contact}
                 onChange={(e) => setForm({ ...form, Contact: e.target.value })}
                 className="w-full border border-white/30 text-white rounded-xl p-3 bg-white/10 
-                focus:outline-none focus:ring-2 focus:ring-blue-400"
+                focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white/20 
+                hover:bg-white/20 transition duration-300"
               />
 
               <textarea
@@ -184,13 +180,15 @@ export default function HeroSlider({ scrollToSection }: HeroSliderProps) {
                 value={form.Message}
                 onChange={(e) => setForm({ ...form, Message: e.target.value })}
                 className="w-full border border-white/30 text-white rounded-xl p-3 bg-white/10 
-                focus:outline-none focus:ring-2 focus:ring-blue-400"
+                focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white/20 
+                hover:bg-white/20 transition duration-300"
               />
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold 
+                transform transition duration-300 hover:scale-105"
               >
                 {loading ? "Sending..." : "Send Message"}
               </button>
