@@ -13,9 +13,18 @@ interface InquiryForm {
   Message: string;
 }
 
-export default function HeroSlider() {
+interface HeroSliderProps {
+  scrollToSection: (section: string) => void;
+}
+
+export default function HeroSlider({ scrollToSection }: HeroSliderProps) {
+  const API = "https://forthubapi-backend-production.up.railway.app/api";
+  const PHOTO_URL =
+    "https://forthubapi-backend-production.up.railway.app/Photos";
+
   const [slides, setSlides] = useState<Slide[]>([]);
-  const [current, setCurrent] = useState<number>(0);
+  const [current, setCurrent] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState<InquiryForm>({
     Name: "",
@@ -24,25 +33,15 @@ export default function HeroSlider() {
     Message: "",
   });
 
-  const scrollToSection = (id: string) => {
-    const section = document.getElementById(id);
-
-    if (section) {
-      section.scrollIntoView({
-        behavior: "smooth",
-      });
-    }
-  };
-
-  // ✅ FETCH banners
+  // FETCH BANNERS
   useEffect(() => {
-    fetch("https://forthubapi-backend-production.up.railway.app/api/banner")
+    fetch(`${API}/banner`)
       .then((res) => res.json())
-      .then((data: Slide[]) => setSlides(data))
+      .then((data) => setSlides(data))
       .catch((err) => console.error("Banner fetch error:", err));
   }, []);
 
-  // ✅ AUTO SLIDER
+  // AUTO SLIDER
   useEffect(() => {
     if (slides.length === 0) return;
 
@@ -53,26 +52,25 @@ export default function HeroSlider() {
     return () => clearInterval(interval);
   }, [slides]);
 
-  // ✅ SUBMIT FORM
+  // SUBMIT INQUIRY
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
-      const res = await fetch(
-        "https://forthubapi-backend-production.up.railway.app/api/inquiry",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(form),
+      const res = await fetch(`${API}/inquiry`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify(form),
+      });
 
       const data = await res.json();
 
       if (!res.ok) {
         alert(data.message || "Failed to send inquiry.");
+        setLoading(false);
         return;
       }
 
@@ -88,25 +86,32 @@ export default function HeroSlider() {
       console.error(err);
       alert("Failed to send inquiry.");
     }
+
+    setLoading(false);
   };
 
-  if (slides.length === 0) return null;
+  // LOADING SCREEN
+  if (slides.length === 0) {
+    return (
+      <div className="h-[650px] flex items-center justify-center bg-black text-white">
+        Loading banners...
+      </div>
+    );
+  }
 
   const slide = slides[current];
 
   const bgImage = slide.PhotoFileName
-    ? `url(https://forthubapi-backend-production.up.railway.app/Photos/${slide.PhotoFileName})`
-    : `url(https://forthubapi-backend-production.up.railway.app/dummy/placeholder.jpg)`;
+    ? `${PHOTO_URL}/${slide.PhotoFileName}`
+    : "/dummy/placeholder.jpg";
 
   return (
     <section
       id="home"
-      className="relative h-162.5 bg-cover bg-center transition-all duration-700 transform hover:scale-105"
-      style={{
-        backgroundImage: `url(${slide.PhotoFileName ? `https://forthubapi-backend-production.up.railway.app/Photos/${slide.PhotoFileName}` : "https://forthubapi-backend-production.up.railway.app/dummy/placeholder.jpg"})`,
-      }}
+      className="relative h-[650px] bg-cover bg-center transition-opacity duration-1000"
+      style={{ backgroundImage: `url(${bgImage})` }}
     >
-      {/* Dark overlay */}
+      {/* DARK OVERLAY */}
       <div className="absolute inset-0 bg-black/50"></div>
 
       <div className="relative z-10 h-full flex items-center">
@@ -116,12 +121,13 @@ export default function HeroSlider() {
             <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight">
               {slide.BannerName}
             </h1>
+
             <p className="text-lg opacity-90 mb-6">{slide.BannerDetails}</p>
 
             <div className="flex flex-wrap gap-4">
               <button
                 onClick={() => scrollToSection("projects")}
-                className="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transform transition duration-300 shadow-lg hover:scale-105"
+                className="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transition transform hover:scale-105 shadow-lg"
               >
                 Explore Our Projects
               </button>
@@ -130,7 +136,7 @@ export default function HeroSlider() {
                 onClick={() =>
                   window.dispatchEvent(new Event("openWhatsAppChat"))
                 }
-                className="bg-white text-black px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 transform transition duration-300 shadow-lg hover:scale-105"
+                className="bg-white text-black px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 transition transform hover:scale-105 shadow-lg"
               >
                 Talk to an Agent
               </button>
@@ -138,27 +144,38 @@ export default function HeroSlider() {
           </div>
 
           {/* RIGHT FORM */}
-          <div className="bg-white/10 p-8 rounded-3xl shadow-2xl backdrop-blur-xl border border-white/20 transition-transform duration-300 transform hover:scale-105">
+          <div className="bg-white/10 p-8 rounded-3xl shadow-2xl backdrop-blur-xl border border-white/20">
             <h2 className="text-2xl font-bold mb-4 text-white">Write Us</h2>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {["Name", "Email", "Contact"].map((field) => (
-                <input
-                  key={field}
-                  type={field === "Email" ? "email" : "text"}
-                  placeholder={
-                    field === "Contact" ? "Contact Number" : `Your ${field}`
-                  }
-                  required={field !== "Contact" ? true : false}
-                  value={form[field as keyof InquiryForm]}
-                  onChange={(e) =>
-                    setForm({ ...form, [field]: e.target.value } as any)
-                  }
-                  className="w-full border border-white/30 text-white rounded-xl p-3 bg-white/10 
-                         focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white/20 
-                         hover:bg-white/20 transition duration-300"
-                />
-              ))}
+              <input
+                type="text"
+                placeholder="Your Name"
+                required
+                value={form.Name}
+                onChange={(e) => setForm({ ...form, Name: e.target.value })}
+                className="w-full border border-white/30 text-white rounded-xl p-3 bg-white/10 
+                focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+
+              <input
+                type="email"
+                placeholder="Your Email"
+                required
+                value={form.Email}
+                onChange={(e) => setForm({ ...form, Email: e.target.value })}
+                className="w-full border border-white/30 text-white rounded-xl p-3 bg-white/10 
+                focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+
+              <input
+                type="text"
+                placeholder="Contact Number"
+                value={form.Contact}
+                onChange={(e) => setForm({ ...form, Contact: e.target.value })}
+                className="w-full border border-white/30 text-white rounded-xl p-3 bg-white/10 
+                focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
 
               <textarea
                 placeholder="Your Message"
@@ -167,16 +184,15 @@ export default function HeroSlider() {
                 value={form.Message}
                 onChange={(e) => setForm({ ...form, Message: e.target.value })}
                 className="w-full border border-white/30 text-white rounded-xl p-3 bg-white/10 
-                       focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white/20 
-                       hover:bg-white/20 transition duration-300"
+                focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
 
               <button
                 type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold 
-                       transform transition duration-300 hover:scale-105"
+                disabled={loading}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition"
               >
-                Send Message
+                {loading ? "Sending..." : "Send Message"}
               </button>
             </form>
           </div>
