@@ -137,62 +137,82 @@ export default function HeroSlider({ scrollToSection }: HeroSliderProps) {
           </div>
 
           {/* RIGHT FORM */}
-          <div className="bg-white/10 p-8 rounded-3xl shadow-2xl backdrop-blur-xl border border-white/20 transition-transform duration-300 transform hover:scale-105">
-            <h2 className="text-2xl font-bold mb-4 text-white">Write Us</h2>
+          <div className="relative group flex items-center">
+            {/* AGENT IMAGE */}
+            <img
+              src="/agent.png"
+              alt="Agent"
+              className="absolute -left-20 bottom-0 w-32 opacity-0 
+    translate-x-10 group-hover:opacity-100 group-hover:translate-x-0
+    transition-all duration-500"
+            />
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <input
-                type="text"
-                placeholder="Your Name"
-                required
-                value={form.Name}
-                onChange={(e) => setForm({ ...form, Name: e.target.value })}
-                className="w-full border border-white/30 text-white rounded-xl p-3 bg-white/10 
+            {/* FORM */}
+            <div
+              className="bg-white/10 p-8 rounded-3xl shadow-2xl backdrop-blur-xl 
+  border border-white/20 transition-transform duration-300 
+  transform group-hover:translate-x-3"
+            >
+              <h2 className="text-2xl font-bold mb-4 text-white">Write Us</h2>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <input
+                  type="text"
+                  placeholder="Your Name"
+                  required
+                  value={form.Name}
+                  onChange={(e) => setForm({ ...form, Name: e.target.value })}
+                  className="w-full border border-white/30 text-white rounded-xl p-3 bg-white/10 
                 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white/20 
                 hover:bg-white/20 transition duration-300"
-              />
+                />
 
-              <input
-                type="email"
-                placeholder="Your Email"
-                required
-                value={form.Email}
-                onChange={(e) => setForm({ ...form, Email: e.target.value })}
-                className="w-full border border-white/30 text-white rounded-xl p-3 bg-white/10 
+                <input
+                  type="email"
+                  placeholder="Your Email"
+                  required
+                  value={form.Email}
+                  onChange={(e) => setForm({ ...form, Email: e.target.value })}
+                  className="w-full border border-white/30 text-white rounded-xl p-3 bg-white/10 
                 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white/20 
                 hover:bg-white/20 transition duration-300"
-              />
+                />
 
-              <input
-                type="text"
-                placeholder="Contact Number"
-                value={form.Contact}
-                onChange={(e) => setForm({ ...form, Contact: e.target.value })}
-                className="w-full border border-white/30 text-white rounded-xl p-3 bg-white/10 
+                <input
+                  type="text"
+                  placeholder="Contact Number"
+                  value={form.Contact}
+                  onChange={(e) =>
+                    setForm({ ...form, Contact: e.target.value })
+                  }
+                  className="w-full border border-white/30 text-white rounded-xl p-3 bg-white/10 
                 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white/20 
                 hover:bg-white/20 transition duration-300"
-              />
+                />
 
-              <textarea
-                placeholder="Your Message"
-                required
-                rows={4}
-                value={form.Message}
-                onChange={(e) => setForm({ ...form, Message: e.target.value })}
-                className="w-full border border-white/30 text-white rounded-xl p-3 bg-white/10 
+                <textarea
+                  placeholder="Your Message"
+                  required
+                  rows={4}
+                  value={form.Message}
+                  onChange={(e) =>
+                    setForm({ ...form, Message: e.target.value })
+                  }
+                  className="w-full border border-white/30 text-white rounded-xl p-3 bg-white/10 
                 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white/20 
                 hover:bg-white/20 transition duration-300"
-              />
+                />
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold 
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold 
                 transform transition duration-300 hover:scale-105"
-              >
-                {loading ? "Sending..." : "Send Message"}
-              </button>
-            </form>
+                >
+                  {loading ? "Sending..." : "Send Message"}
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       </div>
