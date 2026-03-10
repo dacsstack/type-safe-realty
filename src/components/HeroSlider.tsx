@@ -99,7 +99,7 @@ export default function HeroSlider({ scrollToSection }: HeroSliderProps) {
     : "/dummy/placeholder.jpg";
 
   return (
-    <section id="home" className="relative min-h-screen overflow-hidden">
+    <section id="home" className="relative h-[650px] overflow-hidden">
       {/* BACKGROUND SLIDER */}
       {slides.map((slide, index) => {
         const bgImage = slide.PhotoFileName
