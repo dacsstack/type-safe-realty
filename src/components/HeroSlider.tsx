@@ -93,7 +93,7 @@ export default function HeroSlider({ scrollToSection }: HeroSliderProps) {
   // LOADING SCREEN
   if (slides.length === 0) {
     return (
-      <div className="h-[650px] flex items-center justify-center bg-black text-white">
+      <div className="h-162.5 flex items-center justify-center bg-black text-white">
         Loading banners...
       </div>
     );
@@ -108,7 +108,7 @@ export default function HeroSlider({ scrollToSection }: HeroSliderProps) {
   return (
     <section
       id="home"
-      className="relative h-[650px] bg-cover bg-center transition-opacity duration-1000"
+      className="relative h-162.5 bg-cover bg-center transition-opacity duration-1000"
       style={{ backgroundImage: `url(${bgImage})` }}
     >
       {/* DARK OVERLAY */}
