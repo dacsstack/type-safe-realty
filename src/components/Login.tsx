@@ -1,13 +1,9 @@
 import { FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { authService } from "../services/authService";
 
 interface LoginProps {
   setToken: (token: string) => void;
-}
-
-interface LoginResponse {
-  token?: string;
-  message?: string;
 }
 
 export default function Login({ setToken }: LoginProps) {
@@ -25,23 +21,7 @@ export default function Login({ setToken }: LoginProps) {
     setLoading(true);
 
     try {
-      const res = await fetch(
-        "https://forthubapi-backend-production.up.railway.app/api/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ username, password }),
-        },
-      );
-
-      const data: LoginResponse = await res.json();
-
-      if (!res.ok) {
-        setError(data.message || "Invalid username or password");
-        return;
-      }
+      const data = await authService.login({ username, password });
 
       if (data.token) {
         localStorage.setItem("token", data.token);
