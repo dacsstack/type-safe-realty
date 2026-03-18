@@ -38,7 +38,9 @@ export default function Login({ setToken, setRole }: LoginProps) {
       const message = err instanceof Error ? err.message : "Server error";
 
       if (message.toLowerCase().includes("failed to fetch")) {
-        setError("Cannot reach API server. Please start backend on http://localhost:5000.");
+        setError(
+          "Cannot reach API server. Please start backend on http://localhost:5000.",
+        );
       } else {
         setError(message || "Server error, try again.");
       }

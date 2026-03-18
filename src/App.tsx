@@ -33,7 +33,10 @@ const App: FC = () => {
             <Route path="/blogs/:id" element={<BlogDetails />} />
             <Route path="/project/:id" element={<ProjectDetails />} />
             <Route path="/about/:id" element={<AboutDetails />} />
-            <Route path="/login" element={<Login setToken={setToken} setRole={setRole} />} />
+            <Route
+              path="/login"
+              element={<Login setToken={setToken} setRole={setRole} />}
+            />
 
             <Route
               element={
@@ -45,7 +48,10 @@ const App: FC = () => {
               <Route
                 path="/dashboard"
                 element={
-                  <RoleProtectedRoute role={role} allowedRoles={["admin", "user"]}>
+                  <RoleProtectedRoute
+                    role={role}
+                    allowedRoles={["admin", "user"]}
+                  >
                     <Dashboard />
                   </RoleProtectedRoute>
                 }
