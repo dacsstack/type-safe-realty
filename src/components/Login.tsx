@@ -2,6 +2,7 @@ import { FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authService } from "../services/authService";
 import { authStore } from "../store/authStore";
+import { env } from "../utils/env";
 
 interface LoginProps {
   setToken: (token: string) => void;
@@ -39,7 +40,7 @@ export default function Login({ setToken, setRole }: LoginProps) {
 
       if (message.toLowerCase().includes("failed to fetch")) {
         setError(
-          "Cannot reach API server. Please start backend on http://localhost:5000.",
+          `Cannot reach API server at ${env.apiUrl}. Check Vercel VITE_API_URL and Railway CORS_ORIGINS settings.`,
         );
       } else {
         setError(message || "Server error, try again.");
