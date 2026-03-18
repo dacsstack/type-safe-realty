@@ -1,11 +1,13 @@
 import axios from "axios";
 import { FC, useEffect, useState } from "react";
+import { authStore } from "../store/authStore";
 import { useToast } from "../context/ToastContext";
 import type { Blog } from "../types";
 import { variables } from "../Variables";
 
 const BlogAdmin: FC = () => {
   const toast = useToast();
+  const role = authStore.getRole();
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [editing, setEditing] = useState<Blog | null>(null);
   const [form, setForm] = useState<Omit<Blog, "BlogId">>({
@@ -156,12 +158,14 @@ const BlogAdmin: FC = () => {
               >
                 Edit
               </button>
-              <button
-                onClick={() => handleDelete(b.BlogId)}
-                className="bg-red-600 text-white p-2 rounded hover:bg-red-700 transition"
-              >
-                Delete
-              </button>
+              {role === "admin" && (
+                <button
+                  onClick={() => handleDelete(b.BlogId)}
+                  className="bg-red-600 text-white p-2 rounded hover:bg-red-700 transition"
+                >
+                  Delete
+                </button>
+              )}
             </div>
           </div>
         ))}

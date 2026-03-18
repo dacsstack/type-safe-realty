@@ -1,4 +1,5 @@
 import { ChangeEvent, FC, useCallback, useEffect, useState } from "react";
+import { authStore } from "../store/authStore";
 import { useToast } from "../context/ToastContext";
 import type { Banner as BannerType, Developer } from "../types";
 import { variables } from "../Variables";
@@ -10,6 +11,7 @@ interface ApiResponse {
 
 const Banner: FC = () => {
   const toast = useToast();
+  const role = authStore.getRole();
   const [developers, setDevelopers] = useState<Developer[]>([]);
   const [banners, setBanners] = useState<BannerType[]>([]);
   const [modalTitle, setModalTitle] = useState<string>("");
@@ -278,12 +280,14 @@ const Banner: FC = () => {
                   >
                     Edit
                   </button>
-                  <button
-                    onClick={() => handleDeleteClick(ban.BannerId)}
-                    className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md"
-                  >
-                    Delete
-                  </button>
+                  {role === "admin" && (
+                    <button
+                      onClick={() => handleDeleteClick(ban.BannerId)}
+                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md"
+                    >
+                      Delete
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
