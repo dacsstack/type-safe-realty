@@ -76,7 +76,7 @@ export default function WhatsAppChat() {
               <div className="w-8 h-8 rounded-full bg-white overflow-hidden">
                 {/* Agent avatar placeholder */}
                 <img
-                  src="/logo.png"
+                  src="/agent.png"
                   alt="Agent"
                   className="w-full h-full object-cover"
                 />
