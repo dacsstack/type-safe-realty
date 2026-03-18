@@ -77,7 +77,7 @@ const LandingPage: FC = () => {
 
       const res = await axios.get<ProjectData[]>(url);
 
-      if (res.data && res.data.length > 0) {
+      if (res.data && Array.isArray(res.data) && res.data.length > 0) {
         setProjects(res.data);
         scrollToSection("projects");
       } else {
@@ -85,7 +85,7 @@ const LandingPage: FC = () => {
         const allRes = await axios.get<ProjectData[]>(
           variables.API_URL + "project",
         );
-        setProjects(allRes.data);
+        setProjects(Array.isArray(allRes.data) ? allRes.data : []);
       }
     } catch (err) {
       console.error("Error fetching projects:", err);
@@ -101,17 +101,17 @@ const LandingPage: FC = () => {
     // Fetch all data on component mount
     axios
       .get<ProjectData[]>(variables.API_URL + "project")
-      .then((res) => setProjects(res.data))
+      .then((res) => setProjects(Array.isArray(res.data) ? res.data : []))
       .catch((err) => console.error("Error fetching projects:", err));
 
     axios
       .get<AboutData[]>(variables.API_URL + "about")
-      .then((res) => setAbout(res.data))
+      .then((res) => setAbout(Array.isArray(res.data) ? res.data : []))
       .catch((err) => console.error("Error fetching about:", err));
 
     axios
       .get<BlogData[]>(variables.API_URL + "blogs")
-      .then((res) => setBlogs(res.data))
+      .then((res) => setBlogs(Array.isArray(res.data) ? res.data : []))
       .catch((err) => console.error("Error fetching blogs:", err));
   }, []);
 

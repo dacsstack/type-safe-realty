@@ -64,10 +64,10 @@ const Dashboard: FC = () => {
         setStats(statsRes.data);
 
         const projectRes = await API.get("/project");
-        setProjects(projectRes.data);
+        setProjects(Array.isArray(projectRes.data) ? projectRes.data : []);
 
         const inquiryRes = await API.get("/inquiry");
-        setInquiries(inquiryRes.data);
+        setInquiries(Array.isArray(inquiryRes.data) ? inquiryRes.data : []);
       } catch (error) {
         console.error(error);
       }

@@ -37,7 +37,7 @@ export default function HeroSlider({ scrollToSection }: HeroSliderProps) {
   useEffect(() => {
     fetch(`${API}/banner`)
       .then((res) => res.json())
-      .then((data) => setSlides(data))
+      .then((data) => setSlides(Array.isArray(data) ? data : []))
       .catch((err) => console.error("Banner fetch error:", err));
   }, []);
 

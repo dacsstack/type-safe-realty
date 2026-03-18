@@ -40,7 +40,8 @@ export const httpClient = {
       body: JSON.stringify(body),
     });
 
-    const payload = (await response.json()) as TResponse & { message?: string };
+    const text = await response.text();
+    const payload = text ? ((JSON.parse(text)) as TResponse & { message?: string }) : ({} as TResponse & { message?: string });
 
     if (!response.ok) {
       throw new Error(
