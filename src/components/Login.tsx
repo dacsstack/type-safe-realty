@@ -5,9 +5,10 @@ import { authStore } from "../store/authStore";
 
 interface LoginProps {
   setToken: (token: string) => void;
+  setRole: (role: string) => void;
 }
 
-export default function Login({ setToken }: LoginProps) {
+export default function Login({ setToken, setRole }: LoginProps) {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -26,6 +27,7 @@ export default function Login({ setToken }: LoginProps) {
 
       if (data.token) {
         authStore.setAuth(data.token, data.role);
+        setRole(data.role);
         setToken(data.token);
         navigate("/dashboard");
       } else {

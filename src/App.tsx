@@ -22,7 +22,7 @@ import { authStore } from "./store/authStore";
 
 const App: FC = () => {
   const [token, setToken] = useState<string | null>(authStore.getToken());
-  const role = authStore.getRole();
+  const [role, setRole] = useState<string | null>(authStore.getRole());
 
   return (
     <ErrorBoundary>
@@ -33,7 +33,7 @@ const App: FC = () => {
             <Route path="/blogs/:id" element={<BlogDetails />} />
             <Route path="/project/:id" element={<ProjectDetails />} />
             <Route path="/about/:id" element={<AboutDetails />} />
-            <Route path="/login" element={<Login setToken={setToken} />} />
+            <Route path="/login" element={<Login setToken={setToken} setRole={setRole} />} />
 
             <Route
               element={
