@@ -1,8 +1,11 @@
 import axios from "axios";
 import { FC, useEffect, useState } from "react";
+import { useToast } from "../context/ToastContext";
 import type { Blog } from "../types";
+import { variables } from "../Variables";
 
 const BlogAdmin: FC = () => {
+  const toast = useToast();
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [editing, setEditing] = useState<Blog | null>(null);
   const [form, setForm] = useState<Omit<Blog, "BlogId">>({
@@ -11,12 +14,19 @@ const BlogAdmin: FC = () => {
     VideoUrl: "",
   });
 
+  const getAuthHeader = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Not logged in");
+      return null;
+    }
+    return { Authorization: `Bearer ${token}` };
+  };
+
   // Fetch blogs
   const fetchBlogs = async () => {
     try {
-      const res = await axios.get<Blog[]>(
-        "https://forthubapi-backend-production.up.railway.app/api/blogs",
-      );
+      const res = await axios.get<Blog[]>(variables.API_URL + "blogs");
       setBlogs(res.data);
     } catch (err) {
       console.error(err);
@@ -29,33 +39,34 @@ const BlogAdmin: FC = () => {
 
   // CREATE or UPDATE blog
   const handleSubmit = async () => {
+    const headers = getAuthHeader();
+    if (!headers) return;
     try {
       if (editing) {
         await axios.put(
-          `https://forthubapi-backend-production.up.railway.app/api/blogs/${editing.BlogId}`,
-          form,
+          variables.API_URL + "blogs",
+          { ...form, BlogId: editing.BlogId },
+          { headers },
         );
       } else {
-        await axios.post(
-          "https://forthubapi-backend-production.up.railway.app/api/blogs",
-          form,
-        );
+        await axios.post(variables.API_URL + "blogs", form, { headers });
       }
       setForm({ Title: "", Description: "", VideoUrl: "" });
       setEditing(null);
       fetchBlogs();
     } catch (err) {
       console.error(err);
+      toast.error("Save failed. Check console for details.");
     }
   };
 
   // DELETE blog
   const handleDelete = async (id: number) => {
     if (!confirm("Are you sure you want to delete this blog?")) return;
+    const headers = getAuthHeader();
+    if (!headers) return;
     try {
-      await axios.delete(
-        `https://forthubapi-backend-production.up.railway.app/api/blogs/${id}`,
-      );
+      await axios.delete(variables.API_URL + `blogs/${id}`, { headers });
       fetchBlogs();
     } catch (err) {
       console.error(err);

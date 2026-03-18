@@ -1,6 +1,7 @@
 import axios from "axios";
 import { FC, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { variables } from "../Variables";
 import Layout from "../layouts/Layout";
 
 interface ProjectData {
@@ -21,9 +22,7 @@ const ProjectDetails: FC = () => {
 
   useEffect(() => {
     axios
-      .get(
-        `https://forthubapi-backend-production.up.railway.app/api/project/${id}`,
-      )
+      .get(variables.API_URL + `project/${id}`)
       .then((res) => {
         const data: ProjectData = res.data;
         setProject(data);
@@ -70,7 +69,7 @@ const ProjectDetails: FC = () => {
           {photos.map((photo: string, index: number) => (
             <img
               key={index}
-              src={`https://forthubapi-backend-production.up.railway.app/Photos/${photo}`}
+              src={`${variables.PHOTO_URL}${photo}`}
               alt={`${project.ProjectName} photo ${index + 1}`}
               className="w-full h-64 object-cover rounded shadow hover:shadow-lg transition"
             />

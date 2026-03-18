@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useState } from "react";
+import { variables } from "../Variables";
 
 interface Slide {
   BannerName: string;
@@ -18,9 +19,8 @@ interface HeroSliderProps {
 }
 
 export default function HeroSlider({ scrollToSection }: HeroSliderProps) {
-  const API = "https://forthubapi-backend-production.up.railway.app/api";
-  const PHOTO_URL =
-    "https://forthubapi-backend-production.up.railway.app/Photos";
+  const API = variables.API_URL.replace(/\/$/, "");
+  const PHOTO_URL = variables.PHOTO_URL.replace(/\/$/, "");
 
   const [slides, setSlides] = useState<Slide[]>([]);
   const [current, setCurrent] = useState(0);

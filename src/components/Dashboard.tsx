@@ -1,5 +1,7 @@
 import axios from "axios";
 import { FC, useEffect, useState } from "react";
+import { authStore } from "../store/authStore";
+import { variables } from "../Variables";
 
 interface Stats {
   totalProjects: number;
@@ -21,6 +23,7 @@ interface InquiryData {
 }
 
 const Dashboard: FC = () => {
+  const role = authStore.getRole();
   const [stats, setStats] = useState<Stats>({
     totalProjects: 0,
     totalDevelopers: 0,
@@ -31,7 +34,7 @@ const Dashboard: FC = () => {
   const [inquiries, setInquiries] = useState<InquiryData[]>([]);
 
   const API = axios.create({
-    baseURL: "https://forthubapi-backend-production.up.railway.app/api",
+    baseURL: variables.API_URL.replace(/\/$/, ""),
   });
 
   API.interceptors.request.use((config) => {
@@ -137,12 +140,14 @@ const Dashboard: FC = () => {
                 <td className="p-2">{i.Email}</td>
                 <td className="p-2 truncate">{i.Message}</td>
                 <td className="p-2">
-                  <button
-                    onClick={() => deleteInquiry(i.InquiryId)}
-                    className="px-3 py-1 bg-red-600 text-white rounded text-sm"
-                  >
-                    Delete
-                  </button>
+                  {role === "admin" && (
+                    <button
+                      onClick={() => deleteInquiry(i.InquiryId)}
+                      className="px-3 py-1 bg-red-600 text-white rounded text-sm"
+                    >
+                      Delete
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}

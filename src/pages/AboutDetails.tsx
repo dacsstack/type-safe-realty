@@ -1,5 +1,6 @@
 import { FC, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { variables } from "../Variables";
 import Layout from "../layouts/Layout";
 import type { About } from "../types";
 
@@ -11,9 +12,7 @@ const AboutDetails: FC = () => {
   const [photos, setPhotos] = useState<string[]>([]);
 
   useEffect(() => {
-    fetch(
-      `https://forthubapi-backend-production.up.railway.app/api/about/${id}`,
-    )
+    fetch(variables.API_URL + `about/${id}`)
       .then((res) => res.json())
       .then((data: About) => {
         setAbout(data);
@@ -56,7 +55,7 @@ const AboutDetails: FC = () => {
           {photos.map((photo, index) => (
             <img
               key={index}
-              src={`http://localhost:5000/Photos/${photo}`}
+              src={`${variables.PHOTO_URL}${photo}`}
               className="w-full h-64 object-cover rounded shadow"
             />
           ))}

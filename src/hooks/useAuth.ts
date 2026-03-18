@@ -15,7 +15,7 @@ export const useAuth = () => {
     setError("");
     try {
       const result = await authService.login({ username, password });
-      authStore.setToken(result.token);
+      authStore.setAuth(result.token, result.role);
       setTokenState(result.token);
       return result.token;
     } catch (e) {

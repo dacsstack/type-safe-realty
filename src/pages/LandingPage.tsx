@@ -1,6 +1,7 @@
 import axios from "axios";
 import { FC, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { variables } from "../Variables";
 import HeroSlider from "../components/HeroSlider";
 import WhatsAppChat from "../components/WhatsAppChat";
 
@@ -72,9 +73,7 @@ const LandingPage: FC = () => {
       if (currentFilters.maxPrice) queryObj.maxPrice = currentFilters.maxPrice;
 
       const query = new URLSearchParams(queryObj).toString();
-      const url = `https://forthubapi-backend-production.up.railway.app/api/project${
-        query ? "?" + query : ""
-      }`;
+      const url = `${variables.API_URL}project${query ? "?" + query : ""}`;
 
       const res = await axios.get<ProjectData[]>(url);
 
@@ -84,7 +83,7 @@ const LandingPage: FC = () => {
       } else {
         // If no results, fetch all projects
         const allRes = await axios.get<ProjectData[]>(
-          "https://forthubapi-backend-production.up.railway.app/api/project",
+          variables.API_URL + "project",
         );
         setProjects(allRes.data);
       }
@@ -101,23 +100,17 @@ const LandingPage: FC = () => {
   useEffect(() => {
     // Fetch all data on component mount
     axios
-      .get<ProjectData[]>(
-        "https://forthubapi-backend-production.up.railway.app/api/project",
-      )
+      .get<ProjectData[]>(variables.API_URL + "project")
       .then((res) => setProjects(res.data))
       .catch((err) => console.error("Error fetching projects:", err));
 
     axios
-      .get<AboutData[]>(
-        "https://forthubapi-backend-production.up.railway.app/api/about",
-      )
+      .get<AboutData[]>(variables.API_URL + "about")
       .then((res) => setAbout(res.data))
       .catch((err) => console.error("Error fetching about:", err));
 
     axios
-      .get<BlogData[]>(
-        "https://forthubapi-backend-production.up.railway.app/api/blogs",
-      )
+      .get<BlogData[]>(variables.API_URL + "blogs")
       .then((res) => setBlogs(res.data))
       .catch((err) => console.error("Error fetching blogs:", err));
   }, []);
@@ -134,7 +127,7 @@ const LandingPage: FC = () => {
 
     const firstPhoto = photos.length > 0 ? photos[0] : null;
     return firstPhoto
-      ? `https://forthubapi-backend-production.up.railway.app/Photos/${firstPhoto}`
+      ? `${variables.PHOTO_URL}${firstPhoto}`
       : "/dummy/thumb-1.jpg";
   };
 
@@ -416,7 +409,7 @@ const LandingPage: FC = () => {
                   </div>
                 ) : (
                   <img
-                    src={`https://forthubapi-backend-production.up.railway.app/uploads/${b.Image}`}
+                    src={`${variables.UPLOADS_URL}${b.Image}`}
                     alt={b.Title}
                     className="w-full h-52 object-cover transform transition-transform duration-500 group-hover:scale-105"
                   />

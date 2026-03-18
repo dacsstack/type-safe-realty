@@ -1,6 +1,7 @@
 import { FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authService } from "../services/authService";
+import { authStore } from "../store/authStore";
 
 interface LoginProps {
   setToken: (token: string) => void;
@@ -24,22 +25,28 @@ export default function Login({ setToken }: LoginProps) {
       const data = await authService.login({ username, password });
 
       if (data.token) {
-        localStorage.setItem("token", data.token);
+        authStore.setAuth(data.token, data.role);
         setToken(data.token);
         navigate("/dashboard");
       } else {
         setError("Login failed: no token received");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err.message || "Server error, try again.");
+      const message = err instanceof Error ? err.message : "Server error";
+
+      if (message.toLowerCase().includes("failed to fetch")) {
+        setError("Cannot reach API server. Please start backend on http://localhost:5000.");
+      } else {
+        setError(message || "Server error, try again.");
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[70vh] bg-white/10 p-8 shadow-2xl backdrop-blur-xl border border-white/20">
+    <div className="flex items-center justify-center min-h-screen bg-white/10 p-8 shadow-2xl backdrop-blur-md border border-white/20">
       <div className="w-full max-w-md  border-white/30 text-white rounded-xl p-8 bg-white/10 focus:outline-none focus:border-white">
         {/* LOGO */}
         <div className="flex justify-center mb-4">

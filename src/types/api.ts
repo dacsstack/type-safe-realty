@@ -6,6 +6,7 @@ export interface ApiResponse<T> {
 export interface AuthResponse {
   token: string;
   message: string;
+  role: string;
 }
 
 export interface Property {

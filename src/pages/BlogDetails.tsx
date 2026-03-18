@@ -1,5 +1,6 @@
 import { FC, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { variables } from "../Variables";
 import Layout from "../layouts/Layout";
 import type { Blog } from "../types";
 
@@ -8,9 +9,7 @@ const BlogDetails: FC = () => {
   const [blogs, setBlogs] = useState<Blog | null>(null);
 
   useEffect(() => {
-    fetch(
-      `https://forthubapi-backend-production.up.railway.app/api/blogs/${id}`,
-    )
+    fetch(variables.API_URL + `blogs/${id}`)
       .then((res) => res.json())
       .then((data: Blog) => setBlogs(data));
   }, [id]);

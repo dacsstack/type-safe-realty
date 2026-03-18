@@ -1,23 +1,7 @@
-import { Component, ReactNode } from "react";
+import { ChangeEvent, FC, useCallback, useEffect, useState } from "react";
+import { useToast } from "../context/ToastContext";
+import { authStore } from "../store/authStore";
 import { variables } from "../Variables";
-
-interface ProjectState {
-  developers: DeveloperOption[];
-  projects: ProjectData[];
-  modalTitle: string;
-  ProjectId: number;
-  ProjectName: string;
-  Developer: string;
-  PropertyDetails: string;
-  DateOfJoining: string;
-  PhotoFileName: string[];
-  PhotoPath: string;
-  Location: string;
-  Price: string;
-  PropertyType: string;
-  Latitude: string;
-  Longitude: string;
-}
 
 interface DeveloperOption {
   DeveloperId: number;
@@ -32,429 +16,565 @@ interface ProjectData {
   DateOfJoining: string;
   PhotoFileName: string | string[];
   Location: string;
-  Price: number;
-  PropertyType: string;
-  Latitude: number;
-  Longitude: number;
+  Price: number | null;
+  PropertyType: string | null;
+  Latitude: number | null;
+  Longitude: number | null;
 }
 
-export default class Project extends Component<{}, ProjectState> {
-  constructor(props: {}) {
-    super(props);
-    this.state = {
-      developers: [],
-      projects: [],
-      modalTitle: "",
-      ProjectId: 0,
-      ProjectName: "",
-      Developer: "",
-      PropertyDetails: "",
-      DateOfJoining: "",
-      PhotoFileName: [],
-      PhotoPath: variables.PHOTO_URL,
-      Location: "",
-      Price: "",
-      PropertyType: "",
-      Latitude: "",
-      Longitude: "",
-    };
-  }
+interface ApiResponse {
+  message: string;
+  fileNames?: string[];
+}
 
-  getToken(): string | null {
+const Project: FC = () => {
+  const toast = useToast();
+  const role = authStore.getRole();
+  const [developers, setDevelopers] = useState<DeveloperOption[]>([]);
+  const [projects, setProjects] = useState<ProjectData[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const [modalTitle, setModalTitle] = useState("Add Property");
+  const [projectId, setProjectId] = useState(0);
+  const [projectName, setProjectName] = useState("");
+  const [developer, setDeveloper] = useState("");
+  const [propertyDetails, setPropertyDetails] = useState("");
+  const [dateOfJoining, setDateOfJoining] = useState("");
+  const [photoFileName, setPhotoFileName] = useState<string[]>([]);
+  const [location, setLocation] = useState("");
+  const [price, setPrice] = useState("");
+  const [propertyType, setPropertyType] = useState("");
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
+
+  const getToken = useCallback((): string | null => {
     const token = localStorage.getItem("token");
     if (!token) {
-      alert("Please login first!");
       window.location.href = "/login";
       return null;
     }
     return token;
-  }
+  }, []);
 
-  refreshList() {
-    const token = this.getToken();
+  const refreshList = useCallback(async () => {
+    const token = getToken();
     if (!token) return;
+    setLoading(true);
+    try {
+      const [projectsRes, devsRes] = await Promise.all([
+        fetch(variables.API_URL + "project", {
+          cache: "no-store",
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch(variables.API_URL + "developer", {
+          cache: "no-store",
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
 
-    fetch(variables.API_URL + "project", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Project fetch error: " + res.status);
-        return res.json();
-      })
-      .then((data) => {
-        if (Array.isArray(data)) this.setState({ projects: data });
-        else this.setState({ projects: [] });
-      })
-      .catch((err) => console.error(err));
+      if (!projectsRes.ok)
+        throw new Error("Projects fetch error: " + projectsRes.status);
+      if (!devsRes.ok)
+        throw new Error("Developers fetch error: " + devsRes.status);
 
-    fetch(variables.API_URL + "developer", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Developer fetch error: " + res.status);
-        return res.json();
-      })
-      .then((data) => {
-        if (Array.isArray(data)) this.setState({ developers: data });
-        else this.setState({ developers: [] });
-      })
-      .catch((err) => console.error(err));
-  }
+      const projectsData: unknown = await projectsRes.json();
+      const devsData: unknown = await devsRes.json();
 
-  componentDidMount() {
-    this.refreshList();
-  }
+      setProjects(
+        Array.isArray(projectsData) ? (projectsData as ProjectData[]) : [],
+      );
+      setDevelopers(
+        Array.isArray(devsData) ? (devsData as DeveloperOption[]) : [],
+      );
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [getToken]);
 
-  changeProjectName = (e: React.ChangeEvent<HTMLInputElement>) =>
-    this.setState({ ProjectName: e.target.value });
-  changeDeveloper = (e: React.ChangeEvent<HTMLSelectElement>) =>
-    this.setState({ Developer: e.target.value });
-  changePropertyDetails = (e: React.ChangeEvent<HTMLTextAreaElement>) =>
-    this.setState({ PropertyDetails: e.target.value });
-  changeDateOfJoining = (e: React.ChangeEvent<HTMLInputElement>) =>
-    this.setState({ DateOfJoining: e.target.value });
-  changeLocation = (e: React.ChangeEvent<HTMLInputElement>) =>
-    this.setState({ Location: e.target.value });
-  changePrice = (e: React.ChangeEvent<HTMLInputElement>) =>
-    this.setState({ Price: e.target.value });
-  changePropertyType = (e: React.ChangeEvent<HTMLInputElement>) =>
-    this.setState({ PropertyType: e.target.value });
-  changeLatitude = (e: React.ChangeEvent<HTMLInputElement>) =>
-    this.setState({ Latitude: e.target.value });
-  changeLongitude = (e: React.ChangeEvent<HTMLInputElement>) =>
-    this.setState({ Longitude: e.target.value });
+  useEffect(() => {
+    refreshList();
+  }, [refreshList]);
 
-  addClick() {
-    this.setState({
-      modalTitle: "Add Property",
-      ProjectId: 0,
-      ProjectName: "",
-      Developer: "",
-      PropertyDetails: "",
-      DateOfJoining: "",
-      PhotoFileName: [],
-      Location: "",
-      Price: "",
-      PropertyType: "",
-      Latitude: "",
-      Longitude: "",
-    });
-  }
+  const resetForm = useCallback(() => {
+    setModalTitle("Add Property");
+    setProjectId(0);
+    setProjectName("");
+    setDeveloper("");
+    setPropertyDetails("");
+    setDateOfJoining("");
+    setPhotoFileName([]);
+    setLocation("");
+    setPrice("");
+    setPropertyType("");
+    setLatitude("");
+    setLongitude("");
+  }, []);
 
-  editClick = (pro: ProjectData) => {
-    const photos = pro.PhotoFileName
-      ? typeof pro.PhotoFileName === "string"
-        ? pro.PhotoFileName.split(",")
-        : pro.PhotoFileName
+  const handleEditClick = useCallback((item: ProjectData) => {
+    const photos = item.PhotoFileName
+      ? typeof item.PhotoFileName === "string"
+        ? item.PhotoFileName.split(",")
+        : item.PhotoFileName
       : [];
 
-    this.setState({
-      modalTitle: "Edit Project",
-      ProjectId: pro.ProjectId,
-      ProjectName: pro.ProjectName,
-      Developer: pro.Developer,
-      PropertyDetails: pro.PropertyDetails,
-      DateOfJoining: pro.DateOfJoining,
-      PhotoFileName: photos,
-      Location: pro.Location,
-      Price: pro.Price.toString(),
-      PropertyType: pro.PropertyType,
-      Latitude: pro.Latitude.toString(),
-      Longitude: pro.Longitude.toString(),
-    });
-  };
+    setModalTitle("Edit Property");
+    setProjectId(item.ProjectId);
+    setProjectName(item.ProjectName);
+    setDeveloper(item.Developer ?? "");
+    setPropertyDetails(item.PropertyDetails ?? "");
+    setDateOfJoining(item.DateOfJoining ?? "");
+    setPhotoFileName(photos);
+    setLocation(item.Location ?? "");
+    setPrice(item.Price != null ? String(item.Price) : "");
+    setPropertyType(item.PropertyType ?? "");
+    setLatitude(item.Latitude != null ? String(item.Latitude) : "");
+    setLongitude(item.Longitude != null ? String(item.Longitude) : "");
+  }, []);
 
-  createClick = async () => {
-    const token = this.getToken();
+  const buildPayload = useCallback(
+    () => ({
+      ProjectName: projectName,
+      Developer: developer,
+      PropertyDetails: propertyDetails,
+      DateOfJoining: dateOfJoining,
+      PhotoFileName: photoFileName.join(","),
+      Location: location,
+      Price: price ? Number(price) : null,
+      PropertyType: propertyType || null,
+      Latitude: latitude ? Number(latitude) : null,
+      Longitude: longitude ? Number(longitude) : null,
+    }),
+    [
+      projectName,
+      developer,
+      propertyDetails,
+      dateOfJoining,
+      photoFileName,
+      location,
+      price,
+      propertyType,
+      latitude,
+      longitude,
+    ],
+  );
+
+  const handleCreate = useCallback(async () => {
+    if (!projectName.trim()) {
+      toast.error("Please enter a project name");
+      return;
+    }
+    const token = getToken();
     if (!token) return;
-
     try {
-      const response = await fetch(variables.API_URL + "properties", {
+      const res = await fetch(variables.API_URL + "project", {
         method: "POST",
         headers: {
-          Accept: "application/json",
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          ProjectName: this.state.ProjectName,
-          Developer: this.state.Developer,
-          PropertyDetails: this.state.PropertyDetails,
-          DateOfJoining: this.state.DateOfJoining,
-          PhotoFileName: this.state.PhotoFileName,
-          Location: this.state.Location,
-          Price: parseFloat(this.state.Price),
-          PropertyType: this.state.PropertyType,
-          Latitude: parseFloat(this.state.Latitude),
-          Longitude: parseFloat(this.state.Longitude),
-        }),
+        body: JSON.stringify(buildPayload()),
       });
-
-      const result = await response.json();
-      alert(result.message || "Project created");
-      this.refreshList();
-    } catch (err) {
-      console.error(err);
-      alert("Failed to create project");
+      const result: ApiResponse = await res.json();
+      if (!res.ok) {
+        toast.error(result.message || "Failed to create project");
+        return;
+      }
+      toast.success(result.message || "Project created");
+      resetForm();
+      refreshList();
+    } catch {
+      toast.error("Error creating project");
     }
-  };
+  }, [projectName, getToken, buildPayload, toast, resetForm, refreshList]);
 
-  updateClick = async () => {
-    const token = this.getToken();
+  const handleUpdate = useCallback(async () => {
+    if (!projectName.trim()) {
+      toast.error("Please enter a project name");
+      return;
+    }
+    const token = getToken();
     if (!token) return;
-
     try {
-      const response = await fetch(variables.API_URL + "properties", {
+      const res = await fetch(variables.API_URL + "project", {
         method: "PUT",
         headers: {
-          Accept: "application/json",
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          ProjectId: this.state.ProjectId,
-          ProjectName: this.state.ProjectName,
-          Developer: this.state.Developer,
-          PropertyDetails: this.state.PropertyDetails,
-          DateOfJoining: this.state.DateOfJoining,
-          PhotoFileName: this.state.PhotoFileName,
-          Location: this.state.Location,
-          Price: parseFloat(this.state.Price),
-          PropertyType: this.state.PropertyType,
-          Latitude: parseFloat(this.state.Latitude),
-          Longitude: parseFloat(this.state.Longitude),
-        }),
+        body: JSON.stringify({ ProjectId: projectId, ...buildPayload() }),
       });
-
-      const result = await response.json();
-      alert(result.message || "Project updated");
-      this.refreshList();
-    } catch (err) {
-      console.error(err);
-      alert("Failed to update project");
-    }
-  };
-
-  deleteClick = async (id: number) => {
-    const token = this.getToken();
-    if (!token) return;
-
-    if (!window.confirm("Are you sure?")) return;
-
-    try {
-      const response = await fetch(variables.API_URL + `properties/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const result = await response.json();
-      alert(result.message || "Project deleted");
-      this.refreshList();
-    } catch (err) {
-      console.error(err);
-      alert("Failed to delete project");
-    }
-  };
-
-  imageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const token = this.getToken();
-    if (!token) return;
-
-    const files = e.target.files;
-    if (!files?.length) return;
-
-    const formData = new FormData();
-    for (const file of Array.from(files)) {
-      formData.append("files", file);
-    }
-
-    try {
-      const res = await fetch(variables.API_URL + "properties/savefile", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      });
-      const data: { fileNames: string[] } = await res.json();
-
-      if (data.fileNames) {
-        this.setState({
-          PhotoFileName: [...this.state.PhotoFileName, ...data.fileNames],
-        });
+      const result: ApiResponse = await res.json();
+      if (!res.ok) {
+        toast.error(result.message || "Failed to update project");
+        return;
       }
-    } catch (err) {
-      console.error(err);
+      toast.success(result.message || "Project updated");
+      resetForm();
+      refreshList();
+    } catch {
+      toast.error("Error updating project");
     }
+  }, [
+    projectName,
+    projectId,
+    getToken,
+    buildPayload,
+    toast,
+    resetForm,
+    refreshList,
+  ]);
+
+  const handleDelete = useCallback(
+    async (id: number) => {
+      if (!window.confirm("Are you sure you want to delete this project?"))
+        return;
+      const token = getToken();
+      if (!token) return;
+      try {
+        const res = await fetch(variables.API_URL + `project/${id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const result: ApiResponse = await res.json();
+        if (!res.ok) {
+          toast.error(result.message || "Failed to delete project");
+          return;
+        }
+        toast.success(result.message || "Project deleted");
+        refreshList();
+      } catch {
+        toast.error("Error deleting project");
+      }
+    },
+    [getToken, toast, refreshList],
+  );
+
+  const handleImageUpload = useCallback(
+    async (e: ChangeEvent<HTMLInputElement>) => {
+      e.preventDefault();
+      const token = getToken();
+      if (!token) return;
+      const files = e.target.files;
+      if (!files || !files.length) return;
+      const formData = new FormData();
+      for (const file of files) {
+        formData.append("files", file, file.name);
+      }
+      try {
+        const res = await fetch(variables.API_URL + "project/savefile", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData,
+        });
+        if (!res.ok) {
+          const result: ApiResponse = await res.json();
+          toast.error(result.message || "Failed to upload images");
+          return;
+        }
+        const data: ApiResponse = await res.json();
+        if (data.fileNames) {
+          setPhotoFileName((prev) => [...prev, ...data.fileNames!]);
+        }
+      } catch {
+        toast.error("Error uploading images");
+      }
+    },
+    [getToken, toast],
+  );
+
+  const handleRemovePhoto = useCallback((name: string) => {
+    setPhotoFileName((prev) => prev.filter((p) => p !== name));
+  }, []);
+
+  const getPhotos = (item: ProjectData): string[] => {
+    if (!item.PhotoFileName) return [];
+    if (typeof item.PhotoFileName === "string")
+      return item.PhotoFileName.split(",").filter(Boolean);
+    return item.PhotoFileName.filter(Boolean);
   };
 
-  render(): ReactNode {
-    const {
-      developers,
-      projects,
-      modalTitle,
-      ProjectId,
-      ProjectName,
-      Developer,
-      PropertyDetails,
-      DateOfJoining,
-      PhotoPath,
-      PhotoFileName,
-      Location,
-      Price,
-      PropertyType,
-      Latitude,
-      Longitude,
-    } = this.state;
+  return (
+    <div className="p-6">
+      {/* HEADER */}
+      <div className="mb-6 flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Projects / Properties</h2>
+        <button
+          onClick={resetForm}
+          className="rounded-lg bg-blue-600 px-4 py-2 text-white shadow hover:bg-blue-700"
+        >
+          + Add Property
+        </button>
+      </div>
 
-    return (
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Project</h2>
-          <button
-            onClick={() => this.addClick()}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow"
-          >
-            + Add Project
-          </button>
-        </div>
-
-        <div className="overflow-x-auto bg-white rounded-xl shadow mb-8">
-          <table className="min-w-full text-sm text-left">
-            <thead className="bg-gray-100 uppercase text-xs text-gray-600">
+      {/* TABLE */}
+      {loading ? (
+        <p className="py-4 text-gray-500">Loading...</p>
+      ) : (
+        <div className="mb-8 overflow-x-auto rounded-xl bg-white shadow">
+          <table className="min-w-full text-left text-sm">
+            <thead className="bg-gray-100 text-xs uppercase text-gray-600">
               <tr>
-                <th className="px-6 py-3">ID</th>
-                <th className="px-6 py-3">Name</th>
-                <th className="px-6 py-3">Developer</th>
-                <th className="px-6 py-3">Location</th>
-                <th className="px-6 py-3">Price</th>
-                <th className="px-6 py-3">Actions</th>
+                <th className="px-4 py-3">ID</th>
+                <th className="px-4 py-3">Name</th>
+                <th className="px-4 py-3">Developer</th>
+                <th className="px-4 py-3">Location</th>
+                <th className="px-4 py-3">Price</th>
+                <th className="px-4 py-3">Type</th>
+                <th className="px-4 py-3">Photos</th>
+                <th className="px-4 py-3 text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y">
-              {projects.map((p) => (
-                <tr key={p.ProjectId} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">{p.ProjectId}</td>
-                  <td className="px-6 py-4">{p.ProjectName}</td>
-                  <td className="px-6 py-4">{p.Developer}</td>
-                  <td className="px-6 py-4">{p.Location}</td>
-                  <td className="px-6 py-4">${p.Price}</td>
-                  <td className="px-6 py-4 flex gap-2">
+              {projects.map((item) => (
+                <tr key={item.ProjectId} className="hover:bg-gray-50">
+                  <td className="px-4 py-3">{item.ProjectId}</td>
+                  <td className="px-4 py-3">{item.ProjectName}</td>
+                  <td className="px-4 py-3">{item.Developer}</td>
+                  <td className="px-4 py-3">{item.Location}</td>
+                  <td className="px-4 py-3">
+                    {item.Price != null
+                      ? `₱${item.Price.toLocaleString()}`
+                      : "—"}
+                  </td>
+                  <td className="px-4 py-3">{item.PropertyType ?? "—"}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-wrap gap-1">
+                      {getPhotos(item).map((photo) => (
+                        <img
+                          key={photo}
+                          src={variables.PHOTO_URL + photo}
+                          alt={photo}
+                          className="h-12 w-12 rounded object-cover"
+                        />
+                      ))}
+                    </div>
+                  </td>
+                  <td className="flex justify-center gap-2 px-4 py-3">
                     <button
-                      onClick={() => this.editClick(p)}
-                      className="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded text-xs"
+                      onClick={() => handleEditClick(item)}
+                      className="rounded bg-yellow-400 px-3 py-1 text-white hover:bg-yellow-500"
                     >
                       Edit
                     </button>
-                    <button
-                      onClick={() => this.deleteClick(p.ProjectId)}
-                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs"
-                    >
-                      Delete
-                    </button>
+                    {role === "admin" && (
+                      <button
+                        onClick={() => handleDelete(item.ProjectId)}
+                        className="rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600"
+                      >
+                        Delete
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+      )}
 
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h3 className="text-lg font-semibold mb-4">{modalTitle}</h3>
-          <input
-            type="text"
-            placeholder="Project Name"
-            value={ProjectName}
-            onChange={this.changeProjectName}
-            className="w-full border rounded-lg p-2 mb-3 focus:ring-2 focus:ring-blue-500"
-          />
-          <select
-            value={Developer}
-            onChange={this.changeDeveloper}
-            className="w-full border rounded-lg p-2 mb-3"
-          >
-            <option value="">Select Developer</option>
-            {developers.map((d) => (
-              <option key={d.DeveloperId} value={d.DeveloperName}>
-                {d.DeveloperName}
-              </option>
-            ))}
-          </select>
-          <textarea
-            placeholder="Property Details"
-            value={PropertyDetails}
-            onChange={this.changePropertyDetails}
-            className="w-full border rounded-lg p-2 mb-3"
-            rows={3}
-          />
-          <input
-            type="date"
-            value={DateOfJoining}
-            onChange={this.changeDateOfJoining}
-            className="w-full border rounded-lg p-2 mb-3"
-          />
-          <input
-            type="text"
-            placeholder="Location"
-            value={Location}
-            onChange={this.changeLocation}
-            className="w-full border rounded-lg p-2 mb-3"
-          />
-          <input
-            type="number"
-            placeholder="Price"
-            value={Price}
-            onChange={this.changePrice}
-            className="w-full border rounded-lg p-2 mb-3"
-          />
-          <input
-            type="text"
-            placeholder="Property Type"
-            value={PropertyType}
-            onChange={this.changePropertyType}
-            className="w-full border rounded-lg p-2 mb-3"
-          />
-          <input
-            type="number"
-            placeholder="Latitude"
-            value={Latitude}
-            onChange={this.changeLatitude}
-            className="w-full border rounded-lg p-2 mb-3"
-          />
-          <input
-            type="number"
-            placeholder="Longitude"
-            value={Longitude}
-            onChange={this.changeLongitude}
-            className="w-full border rounded-lg p-2 mb-3"
-          />
-
-          <div className="mb-3">
-            <input type="file" multiple onChange={this.imageUpload} />
-            <div className="mt-2 flex flex-wrap gap-2">
-              {PhotoFileName.map((f, i) => (
-                <div key={i} className="text-xs bg-gray-200 px-2 py-1 rounded">
-                  {f}
-                </div>
-              ))}
+      {/* FORM */}
+      <div className="max-w-4xl rounded-xl bg-white p-6 shadow">
+        <h3 className="mb-6 text-lg font-semibold">{modalTitle}</h3>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          {/* Left column */}
+          <div className="space-y-4">
+            <div>
+              <label className="mb-1 block text-sm font-medium">
+                Project Name
+              </label>
+              <input
+                type="text"
+                value={projectName}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setProjectName(e.target.value)
+                }
+                className="w-full rounded-lg border p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Project name"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium">
+                Developer
+              </label>
+              <select
+                value={developer}
+                onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                  setDeveloper(e.target.value)
+                }
+                className="w-full rounded-lg border p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">— Select Developer —</option>
+                {developers.map((d) => (
+                  <option key={d.DeveloperId} value={d.DeveloperName}>
+                    {d.DeveloperName}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium">
+                Property Details
+              </label>
+              <textarea
+                value={propertyDetails}
+                onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                  setPropertyDetails(e.target.value)
+                }
+                rows={3}
+                className="w-full rounded-lg border p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Property details..."
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium">Date</label>
+              <input
+                type="date"
+                value={dateOfJoining}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setDateOfJoining(e.target.value)
+                }
+                className="w-full rounded-lg border p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium">Location</label>
+              <input
+                type="text"
+                value={location}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setLocation(e.target.value)
+                }
+                className="w-full rounded-lg border p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Location"
+              />
             </div>
           </div>
 
-          {ProjectId === 0 ? (
+          {/* Right column */}
+          <div className="space-y-4">
+            <div>
+              <label className="mb-1 block text-sm font-medium">
+                Price (₱)
+              </label>
+              <input
+                type="number"
+                value={price}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setPrice(e.target.value)
+                }
+                className="w-full rounded-lg border p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="0"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium">
+                Property Type
+              </label>
+              <select
+                value={propertyType}
+                onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                  setPropertyType(e.target.value)
+                }
+                className="w-full rounded-lg border p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">— Select Type —</option>
+                <option value="House and Lot">House and Lot</option>
+                <option value="Condominium">Condominium</option>
+                <option value="Townhouse">Townhouse</option>
+                <option value="Lot Only">Lot Only</option>
+                <option value="Commercial">Commercial</option>
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium">Latitude</label>
+              <input
+                type="number"
+                step="any"
+                value={latitude}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setLatitude(e.target.value)
+                }
+                className="w-full rounded-lg border p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="e.g. 14.5995"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium">
+                Longitude
+              </label>
+              <input
+                type="number"
+                step="any"
+                value={longitude}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setLongitude(e.target.value)
+                }
+                className="w-full rounded-lg border p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="e.g. 120.9842"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium">Photos</label>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleImageUpload}
+                className="w-full rounded-lg border p-2"
+              />
+              {photoFileName.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {photoFileName.map((photo) => (
+                    <div key={photo} className="group relative">
+                      <img
+                        src={variables.PHOTO_URL + photo}
+                        alt={photo}
+                        className="h-24 w-24 rounded object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemovePhoto(photo)}
+                        className="absolute top-0 right-0 hidden h-6 w-6 items-center justify-center rounded-full bg-red-600 text-xs text-white group-hover:flex"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Action buttons */}
+        <div className="mt-6 flex gap-3">
+          {projectId === 0 ? (
             <button
-              onClick={this.createClick}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+              onClick={handleCreate}
+              className="rounded-lg bg-blue-600 px-6 py-2 text-white hover:bg-blue-700"
             >
               Create
             </button>
           ) : (
             <button
-              onClick={this.updateClick}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
+              onClick={handleUpdate}
+              className="rounded-lg bg-green-600 px-6 py-2 text-white hover:bg-green-700"
             >
               Update
             </button>
           )}
+          <button
+            onClick={resetForm}
+            className="rounded-lg border px-6 py-2 text-gray-600 hover:bg-gray-100"
+          >
+            Cancel
+          </button>
         </div>
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
+
+export default Project;

@@ -1,251 +1,250 @@
-import { Component, ReactNode } from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { useToast } from "../context/ToastContext";
+import { authStore } from "../store/authStore";
 import { variables } from "../Variables";
-
-interface FeatureState {
-  features: FeatureData[];
-  featuresWithoutFilter: FeatureData[];
-  modalTitle: string;
-  FeatureProfileName: string;
-  FeatureId: number;
-  FeatureIdFilter: string;
-  FeatureProfileNameFilter: string;
-}
 
 interface FeatureData {
   FeatureId: number;
   FeatureProfileName: string;
 }
 
-export default class Feature extends Component<{}, FeatureState> {
-  constructor(props: {}) {
-    super(props);
-    this.state = {
-      features: [],
-      featuresWithoutFilter: [],
-      modalTitle: "",
-      FeatureProfileName: "",
-      FeatureId: 0,
-      FeatureIdFilter: "",
-      FeatureProfileNameFilter: "",
-    };
-  }
+const Feature: FC = () => {
+  const toast = useToast();
+  const [features, setFeatures] = useState<FeatureData[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [modalTitle, setModalTitle] = useState("Add Feature");
+  const [featureId, setFeatureId] = useState(0);
+  const [featureName, setFeatureName] = useState("");
+  const [idFilter, setIdFilter] = useState("");
+  const [nameFilter, setNameFilter] = useState("");
 
-  FilterFn() {
-    const { FeatureIdFilter, FeatureProfileNameFilter, featuresWithoutFilter } =
-      this.state;
-    const filtered = featuresWithoutFilter.filter(
-      (el) =>
-        el.FeatureId.toString()
-          .toLowerCase()
-          .includes(FeatureIdFilter.toLowerCase().trim()) &&
-        el.FeatureProfileName.toLowerCase().includes(
-          FeatureProfileNameFilter.toLowerCase().trim(),
-        ),
-    );
-    this.setState({ features: filtered });
-  }
+  const getToken = useCallback((): string | null => {
+    const token = authStore.getToken();
+    if (!token) {
+      window.location.href = "/login";
+      return null;
+    }
+    return token;
+  }, []);
 
-  changeFeatureIdFilter = (e: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ FeatureIdFilter: e.target.value }, () => this.FilterFn());
-  };
-  changeFeatureProfileNameFilter = (e: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ FeatureProfileNameFilter: e.target.value }, () =>
-      this.FilterFn(),
-    );
-  };
+  const filtered = useMemo(
+    () =>
+      features.filter(
+        (f) =>
+          f.FeatureId.toString().includes(idFilter.trim()) &&
+          f.FeatureProfileName.toLowerCase().includes(nameFilter.toLowerCase().trim()),
+      ),
+    [features, idFilter, nameFilter],
+  );
 
-  async refreshList() {
+  const refresh = useCallback(async () => {
+    const token = getToken();
+    if (!token) return;
+    setLoading(true);
     try {
       const res = await fetch(variables.API_URL + "features", {
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + (localStorage.getItem("token") || ""),
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-
       if (res.status === 401) {
-        alert("Session expired. Please login again.");
-        localStorage.removeItem("token");
         window.location.href = "/login";
         return;
       }
-
-      if (!res.ok) throw new Error("HTTP error " + res.status);
-
+      if (!res.ok) throw new Error("HTTP " + res.status);
       const data: unknown = await res.json();
-      if (Array.isArray(data)) {
-        this.setState({ features: data, featuresWithoutFilter: data });
-      } else {
-        console.error("Invalid data format:", data);
-        this.setState({ features: [] });
-      }
+      setFeatures(Array.isArray(data) ? (data as FeatureData[]) : []);
     } catch (err) {
-      console.error("Fetch failed:", err);
-      this.setState({ features: [] });
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-  }
+  }, [getToken]);
 
-  componentDidMount() {
-    this.refreshList();
-  }
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
 
-  changeFeatureProfileName = (e: React.ChangeEvent<HTMLInputElement>) =>
-    this.setState({ FeatureProfileName: e.target.value });
+  const resetForm = useCallback(() => {
+    setModalTitle("Add Feature");
+    setFeatureId(0);
+    setFeatureName("");
+  }, []);
 
-  addClick() {
-    this.setState({
-      modalTitle: "Add Feature",
-      FeatureId: 0,
-      FeatureProfileName: "",
-    });
-  }
-
-  editClick = (fea: FeatureData) => {
-    this.setState({
-      modalTitle: "Edit Feature",
-      FeatureId: fea.FeatureId,
-      FeatureProfileName: fea.FeatureProfileName,
-    });
-  };
-
-  async createClick() {
+  const handleCreate = useCallback(async () => {
+    if (!featureName.trim()) {
+      toast.error("Please enter a feature name");
+      return;
+    }
+    const token = getToken();
+    if (!token) return;
     try {
       const res = await fetch(variables.API_URL + "features", {
         method: "POST",
         headers: {
-          Accept: "application/json",
           "Content-Type": "application/json",
-          Authorization: "Bearer " + (localStorage.getItem("token") || ""),
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          FeatureProfileName: this.state.FeatureProfileName,
-        }),
+        body: JSON.stringify({ FeatureProfileName: featureName }),
       });
-      const result: { message: string } = await res.json();
-      alert(result.message);
-      this.refreshList();
+      const result = await res.json();
+      if (!res.ok) {
+        toast.error(result.message || "Failed to create feature");
+        return;
+      }
+      toast.success(result.message || "Feature created");
+      resetForm();
+      refresh();
     } catch {
-      alert("Failed");
+      toast.error("Error creating feature");
     }
-  }
+  }, [featureName, getToken, toast, resetForm, refresh]);
 
-  async updateClick() {
+  const handleUpdate = useCallback(async () => {
+    if (!featureName.trim()) {
+      toast.error("Please enter a feature name");
+      return;
+    }
+    const token = getToken();
+    if (!token) return;
     try {
       const res = await fetch(variables.API_URL + "features", {
         method: "PUT",
         headers: {
-          Accept: "application/json",
           "Content-Type": "application/json",
-          Authorization: "Bearer " + (localStorage.getItem("token") || ""),
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          FeatureId: this.state.FeatureId,
-          FeatureProfileName: this.state.FeatureProfileName,
-        }),
+        body: JSON.stringify({ FeatureId: featureId, FeatureProfileName: featureName }),
       });
-      const result: { message: string } = await res.json();
-      alert(result.message);
-      this.refreshList();
+      const result = await res.json();
+      if (!res.ok) {
+        toast.error(result.message || "Failed to update feature");
+        return;
+      }
+      toast.success(result.message || "Feature updated");
+      resetForm();
+      refresh();
     } catch {
-      alert("Failed");
+      toast.error("Error updating feature");
     }
-  }
+  }, [featureId, featureName, getToken, toast, resetForm, refresh]);
 
-  deleteClick = async (id: number) => {
-    if (!window.confirm("Are you sure?")) return;
-    try {
-      const res = await fetch(variables.API_URL + "features/" + id, {
-        method: "DELETE",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + (localStorage.getItem("token") || ""),
-        },
-      });
-      const result: { message: string } = await res.json();
-      alert(result.message);
-      this.refreshList();
-    } catch {
-      alert("Failed");
-    }
-  };
+  const handleDelete = useCallback(
+    async (id: number) => {
+      if (!window.confirm("Are you sure you want to delete this feature?")) return;
+      const token = getToken();
+      if (!token) return;
+      try {
+        const res = await fetch(variables.API_URL + `features/${id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const result = await res.json();
+        if (!res.ok) {
+          toast.error(result.message || "Failed to delete feature");
+          return;
+        }
+        toast.success(result.message || "Feature deleted");
+        refresh();
+      } catch {
+        toast.error("Error deleting feature");
+      }
+    },
+    [getToken, toast, refresh],
+  );
 
-  render(): ReactNode {
-    const { features, modalTitle, FeatureId, FeatureProfileName } = this.state;
+  return (
+    <div className="p-6">
+      <h2 className="mb-4 text-2xl font-bold">Features</h2>
 
-    return (
-      <div className="p-4">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold">Feature</h2>
-          <button
-            onClick={() => this.addClick()}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow"
-          >
-            + Add Feature
-          </button>
-        </div>
-
-        <div className="overflow-x-auto bg-white rounded-xl shadow">
-          <table className="min-w-full text-sm text-left">
-            <thead className="bg-gray-100 text-gray-700 uppercase text-xs">
-              <tr>
-                <th className="px-6 py-3">Feature ID</th>
-                <th className="px-6 py-3">Feature Name</th>
-                <th className="px-6 py-3 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {features.map((fea) => (
-                <tr key={fea.FeatureId} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">{fea.FeatureId}</td>
-                  <td className="px-6 py-4">{fea.FeatureProfileName}</td>
-                  <td className="px-6 py-4 flex justify-center gap-2">
-                    <button
-                      onClick={() => this.editClick(fea)}
-                      className="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-md"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => this.deleteClick(fea.FeatureId)}
-                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="mt-6 bg-white p-6 rounded-xl shadow max-w-8xl">
-          <h3 className="text-lg font-semibold mb-4">{modalTitle}</h3>
-          <input
-            type="text"
-            placeholder="Feature Profile Name"
-            value={FeatureProfileName}
-            onChange={this.changeFeatureProfileName}
-            className="w-full border rounded-lg p-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          {FeatureId === 0 ? (
-            <button
-              onClick={() => this.createClick()}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
-            >
-              Create
-            </button>
-          ) : (
-            <button
-              onClick={() => this.updateClick()}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
-            >
-              Update
-            </button>
-          )}
-        </div>
+      <div className="mb-4 flex gap-2">
+        <input
+          type="text"
+          placeholder="Filter by ID"
+          value={idFilter}
+          onChange={(e) => setIdFilter(e.target.value)}
+          className="rounded border px-3 py-2"
+        />
+        <input
+          type="text"
+          placeholder="Filter by Name"
+          value={nameFilter}
+          onChange={(e) => setNameFilter(e.target.value)}
+          className="rounded border px-3 py-2"
+        />
+        <button
+          onClick={resetForm}
+          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+        >
+          Add Feature
+        </button>
       </div>
-    );
-  }
-}
+
+      {loading ? (
+        <p className="py-4 text-gray-500">Loading...</p>
+      ) : (
+        <table className="w-full border">
+          <thead>
+            <tr className="bg-gray-200">
+              <th className="p-2 text-left">ID</th>
+              <th className="p-2 text-left">Name</th>
+              <th className="p-2 text-left">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((f) => (
+              <tr key={f.FeatureId} className="border-b">
+                <td className="p-2">{f.FeatureId}</td>
+                <td className="p-2">{f.FeatureProfileName}</td>
+                <td className="flex gap-2 p-2">
+                  <button
+                    onClick={() => {
+                      setModalTitle("Edit Feature");
+                      setFeatureId(f.FeatureId);
+                      setFeatureName(f.FeatureProfileName);
+                    }}
+                    className="rounded bg-green-600 px-3 py-1 text-white hover:bg-green-700"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(f.FeatureId)}
+                    className="rounded bg-red-600 px-3 py-1 text-white hover:bg-red-700"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      <div className="mt-6 rounded-xl bg-white p-6 shadow">
+        <h3 className="mb-4 text-lg font-semibold">{modalTitle}</h3>
+        <input
+          type="text"
+          placeholder="Feature Name"
+          value={featureName}
+          onChange={(e) => setFeatureName(e.target.value)}
+          className="mb-4 w-full rounded-lg border p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        {featureId === 0 ? (
+          <button
+            onClick={handleCreate}
+            className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+          >
+            Create
+          </button>
+        ) : (
+          <button
+            onClick={handleUpdate}
+            className="rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+          >
+            Update
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Feature;

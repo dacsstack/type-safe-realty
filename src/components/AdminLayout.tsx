@@ -1,5 +1,6 @@
 import { FC } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { authStore } from "../store/authStore";
 
 interface AdminLayoutProps {
   setToken: (token: string | null) => void;
@@ -7,9 +8,11 @@ interface AdminLayoutProps {
 
 const AdminLayout: FC<AdminLayoutProps> = ({ setToken }) => {
   const navigate = useNavigate();
+  const role = authStore.getRole();
+  const isAdmin = role === "admin";
 
   const logout = () => {
-    localStorage.removeItem("token");
+    authStore.clear();
     setToken(null);
     navigate("/login");
   };
@@ -44,16 +47,18 @@ const AdminLayout: FC<AdminLayoutProps> = ({ setToken }) => {
             Dashboard
           </NavLink>
 
-          <NavLink
-            to="/developer"
-            className={({ isActive }) =>
-              `block p-3 rounded-lg ${
-                isActive ? "bg-blue-600 text-white" : "hover:bg-gray-200"
-              }`
-            }
-          >
-            Developers
-          </NavLink>
+          {isAdmin && (
+            <NavLink
+              to="/developer"
+              className={({ isActive }) =>
+                `block p-3 rounded-lg ${
+                  isActive ? "bg-blue-600 text-white" : "hover:bg-gray-200"
+                }`
+              }
+            >
+              Developers
+            </NavLink>
+          )}
 
           <NavLink
             to="/project"
@@ -76,16 +81,18 @@ const AdminLayout: FC<AdminLayoutProps> = ({ setToken }) => {
           >
             Banners
           </NavLink>
-          <NavLink
-            to="/features"
-            className={({ isActive }) =>
-              `block p-3 rounded-lg ${
-                isActive ? "bg-blue-600 text-white" : "hover:bg-gray-200"
-              }`
-            }
-          >
-            Features
-          </NavLink>
+          {isAdmin && (
+            <NavLink
+              to="/features"
+              className={({ isActive }) =>
+                `block p-3 rounded-lg ${
+                  isActive ? "bg-blue-600 text-white" : "hover:bg-gray-200"
+                }`
+              }
+            >
+              Features
+            </NavLink>
+          )}
           <NavLink
             to="/about"
             className={({ isActive }) =>
@@ -106,6 +113,19 @@ const AdminLayout: FC<AdminLayoutProps> = ({ setToken }) => {
           >
             Blogs
           </NavLink>
+
+          {isAdmin && (
+            <NavLink
+              to="/users"
+              className={({ isActive }) =>
+                `block p-3 rounded-lg ${
+                  isActive ? "bg-blue-600 text-white" : "hover:bg-gray-200"
+                }`
+              }
+            >
+              Users
+            </NavLink>
+          )}
 
           <button
             onClick={logout}

@@ -1,6 +1,7 @@
 import { ChangeEvent, FC, useCallback, useEffect, useState } from "react";
-import { variables } from "../Variables";
+import { useToast } from "../context/ToastContext";
 import type { Banner as BannerType, Developer } from "../types";
+import { variables } from "../Variables";
 
 interface ApiResponse {
   message: string;
@@ -8,6 +9,7 @@ interface ApiResponse {
 }
 
 const Banner: FC = () => {
+  const toast = useToast();
   const [developers, setDevelopers] = useState<Developer[]>([]);
   const [banners, setBanners] = useState<BannerType[]>([]);
   const [modalTitle, setModalTitle] = useState<string>("");
@@ -22,7 +24,6 @@ const Banner: FC = () => {
   const getToken = useCallback((): string | null => {
     const token = localStorage.getItem("token");
     if (!token) {
-      alert("Please login first!");
       window.location.href = "/login";
       return null;
     }
@@ -122,11 +123,11 @@ const Banner: FC = () => {
         }),
       });
       const result: ApiResponse = await res.json();
-      alert(result.message);
+      toast.success(result.message);
       refreshList();
     } catch (err) {
       console.error(err);
-      alert("Failed");
+      toast.error("Failed");
     }
   }, [
     bannerName,
@@ -164,11 +165,11 @@ const Banner: FC = () => {
         }),
       });
       const result: ApiResponse = await res.json();
-      alert(result.message);
+      toast.success(result.message);
       refreshList();
     } catch (err) {
       console.error(err);
-      alert("Failed");
+      toast.error("Failed");
     }
   }, [
     bannerId,
@@ -194,11 +195,11 @@ const Banner: FC = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         const result: ApiResponse = await res.json();
-        alert(result.message);
+        toast.success(result.message);
         refreshList();
       } catch (err) {
         console.error(err);
-        alert("Failed");
+        toast.error("Failed");
       }
     },
     [getToken, refreshList],
@@ -340,16 +341,34 @@ const Banner: FC = () => {
 
           {/* RIGHT SIDE: MULTIPLE IMAGES */}
           <div className="flex flex-col items-center">
-            <div className="flex flex-wrap gap-2 mb-4">
-              {photoFileName.map((file) => (
-                <img
-                  key={file}
-                  src={photoPath + file}
-                  alt="Banner"
-                  className="w-32 h-32 object-cover rounded-lg shadow"
-                />
-              ))}
-            </div>
+            {photoFileName.length > 0 && (
+              <div className="flex flex-wrap gap-3 mb-4">
+                {photoFileName.map((file, i) => (
+                  <div key={i} className="relative group">
+                    <img
+                      src={photoPath + file}
+                      alt={file}
+                      className="w-24 h-24 object-cover rounded-lg border shadow"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPhotoFileName((prev) =>
+                          prev.filter((_, idx) => idx !== i),
+                        )
+                      }
+                      className="absolute top-0 right-0 bg-red-600 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="Remove image"
+                    >
+                      ×
+                    </button>
+                    <p className="text-xs text-gray-500 mt-1 max-w-24 truncate">
+                      {file}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
             <input
               type="file"
               multiple
