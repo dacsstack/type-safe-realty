@@ -13,7 +13,7 @@ export default function WhatsAppChat() {
   ]);
   const [isTyping, setIsTyping] = useState(false);
 
-  const phone = "639770682561"; // WhatsApp number
+  const phone = "639175537649"; // WhatsApp number
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Listen for external HeroSlider button click
