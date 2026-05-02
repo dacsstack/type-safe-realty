@@ -140,6 +140,12 @@ const LandingPage: FC = () => {
           name="description"
           content="Find the best real estate properties in the Philippines."
         />
+        <meta
+          property="og:image"
+          content="https://forthubrealty.com/grand-hyatt-manila.jpg"
+        />
+        <meta property="og:url" content="https://forthubrealty.com" />
+        <meta property="og:type" content="website" />
       </Helmet>
       <div className="font-['Roboto_Condensed']">
         {/* HEADER */}
