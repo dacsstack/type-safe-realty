@@ -140,11 +140,17 @@ const LandingPage: FC = () => {
           name="description"
           content="Find the best real estate properties in the Philippines."
         />
+        {/* Open Graph */}
+        <meta property="og:title" content="Forthub Realty" />
+        <meta
+          property="og:description"
+          content="Find the best real estate properties in the Philippines."
+        />
         <meta
           property="og:image"
-          content="https://forthubrealty.com/grand-hyatt-manila.jpg"
+          content="https://forthubrealty.com/logo.png"
         />
-        <meta property="og:url" content="https://forthubrealty.com" />
+        <meta property="og:url" content="https://forthubrealty.com/" />
         <meta property="og:type" content="website" />
 
         {/* Twitter (optional but good) */}
