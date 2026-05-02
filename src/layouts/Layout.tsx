@@ -230,7 +230,7 @@ const Layout: FC<LayoutProps> = ({ children }) => {
               </p>
               <p className="flex items-center gap-2">
                 <i className="fa fa-phone"></i>
-                +63 912 345 6789
+                +63 917 553 7649
               </p>
               <p className="flex items-center gap-2">
                 <i className="fa fa-envelope"></i>
