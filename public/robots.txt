@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://forthubrealty.com/sitemap.xml
+Sitemap: https://www.forthubrealty.com/sitemap.xml
