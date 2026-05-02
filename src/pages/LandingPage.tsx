@@ -146,6 +146,18 @@ const LandingPage: FC = () => {
         />
         <meta property="og:url" content="https://forthubrealty.com" />
         <meta property="og:type" content="website" />
+
+        {/* Twitter (optional but good) */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Forthub Realty" />
+        <meta
+          name="twitter:description"
+          content="Find the best real estate properties in the Philippines."
+        />
+        <meta
+          name="twitter:image"
+          content="https://forthubrealty.com/grand-hyatt-manila.jpg"
+        />
       </Helmet>
       <div className="font-['Roboto_Condensed']">
         {/* HEADER */}
