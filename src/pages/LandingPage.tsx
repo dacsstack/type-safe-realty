@@ -193,14 +193,14 @@ const LandingPage: FC = () => {
                     Our Projects
                   </button>
                 </li>
-                <li>
+                {/* <li>
                   <a
                     href="/developers"
                     className="font-medium hover:text-yellow-300 transition"
                   >
                     Developers
                   </a>
-                </li>
+                </li> */}
                 <li>
                   <button
                     onClick={() => scrollToSection("contact")}
