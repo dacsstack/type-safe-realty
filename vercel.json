@@ -3,10 +3,6 @@
     {
       "source": "/api/(.*)",
       "destination": "https://api-typesafe-production.up.railway.app/api/$1"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/"
     }
   ]
 }
