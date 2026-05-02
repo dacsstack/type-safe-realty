@@ -14,7 +14,6 @@ import Users from "./components/Users";
 import { ToastProvider } from "./context/ToastContext";
 import AboutDetails from "./pages/AboutDetails";
 import BlogDetails from "./pages/BlogDetails";
-import Developers from "./pages/Developers";
 import LandingPage from "./pages/LandingPage";
 import ProjectDetails from "./pages/ProjectDetails";
 import ProtectedRoute from "./ProtectedRoute";
@@ -31,7 +30,6 @@ const App: FC = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<LandingPage />} />
-            <Route path="/developers" element={<Developers />} />
             <Route path="/blogs/:id" element={<BlogDetails />} />
             <Route path="/project/:id" element={<ProjectDetails />} />
             <Route path="/about/:id" element={<AboutDetails />} />
