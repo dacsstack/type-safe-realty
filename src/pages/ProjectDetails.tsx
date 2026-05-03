@@ -10,7 +10,6 @@ interface ProjectData {
   Developer: string;
   PropertyDetails: string;
   PhotoFileName: string | string[];
-  [key: string]: any;
 }
 
 const ProjectDetails: FC = () => {
@@ -22,12 +21,11 @@ const ProjectDetails: FC = () => {
 
   useEffect(() => {
     axios
-      .get(variables.API_URL + `project/${id}`)
+      .get<ProjectData>(variables.API_URL + `project/${id}`)
       .then((res) => {
         const data: ProjectData = res.data;
         setProject(data);
 
-        // Convert photos safely to array
         if (data.PhotoFileName) {
           if (typeof data.PhotoFileName === "string") {
             setPhotos(data.PhotoFileName.split(","));
