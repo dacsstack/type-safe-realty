@@ -19,7 +19,10 @@ interface ProjectData {
   Developer: string;
   PropertyDetails: string;
   PhotoFileName: string | string[];
-  [key: string]: any;
+  Location?: string;
+  Type?: string;
+  MinPrice?: number;
+  MaxPrice?: number;
 }
 
 interface AboutData {
@@ -27,7 +30,6 @@ interface AboutData {
   Title: string;
   Feature: string;
   PhotoFileName: string | string[];
-  [key: string]: any;
 }
 
 interface BlogData {
@@ -37,7 +39,6 @@ interface BlogData {
   Image: string;
   VideoUrl?: string;
   CreatedAt: string;
-  [key: string]: any;
 }
 
 const LandingPage: FC = () => {
@@ -82,7 +83,6 @@ const LandingPage: FC = () => {
         setProjects(res.data);
         scrollToSection("projects");
       } else {
-        // If no results, fetch all projects
         const allRes = await axios.get<ProjectData[]>(
           variables.API_URL + "project",
         );
@@ -99,7 +99,6 @@ const LandingPage: FC = () => {
   };
 
   useEffect(() => {
-    // Fetch all data on component mount
     axios
       .get<ProjectData[]>(variables.API_URL + "project")
       .then((res) => setProjects(Array.isArray(res.data) ? res.data : []))
@@ -146,8 +145,6 @@ const LandingPage: FC = () => {
         />
         <meta property="og:url" content="https://forthubrealty.com" />
         <meta property="og:type" content="website" />
-
-        {/* Twitter (optional but good) */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Forthub Realty" />
         <meta
@@ -211,14 +208,6 @@ const LandingPage: FC = () => {
                     Our Projects
                   </button>
                 </li>
-                {/* <li>
-                  <a
-                    href="/developers"
-                    className="font-medium hover:text-yellow-300 transition"
-                  >
-                    Developers
-                  </a>
-                </li> */}
                 <li>
                   <button
                     onClick={() => scrollToSection("contact")}
@@ -386,22 +375,18 @@ const LandingPage: FC = () => {
                 onClick={() => navigate(`/about/${item.AboutId}`)}
                 className="group relative bg-black/50 rounded-2xl overflow-hidden shadow-lg cursor-pointer transform transition-transform duration-500 hover:scale-105 hover:shadow-2xl"
               >
-                {/* IMAGE */}
                 <img
                   src={getPhotoUrl(item.PhotoFileName)}
                   alt={item.Title}
                   className="w-full h-48 object-cover transform transition-transform duration-500 group-hover:scale-105"
                 />
-
-                {/* HOVER OVERLAY */}
                 <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
-
-                {/* CONTENT */}
                 <div className="p-6 relative z-10">
                   <h3 className="text-3xl font-bold mb-4 text-white">
                     {item.Feature}
                   </h3>
                   <p className="text-white text-sm">{item.Title}</p>
+                  {/* FIXED: restored missing <a tag */}
                   <a
                     href="#"
                     className="mt-2 inline-block text-blue-200 font-semibold hover:underline"
@@ -435,7 +420,6 @@ const LandingPage: FC = () => {
                   key={b.BlogId}
                   className="group relative rounded-2xl overflow-hidden shadow-lg cursor-pointer transform transition-transform duration-500 hover:scale-105 hover:shadow-2xl"
                 >
-                  {/* IMAGE / VIDEO */}
                   {b.VideoUrl ? (
                     <div className="aspect-video overflow-hidden">
                       <img
@@ -451,11 +435,7 @@ const LandingPage: FC = () => {
                       className="w-full h-52 object-cover transform transition-transform duration-500 group-hover:scale-105"
                     />
                   )}
-
-                  {/* HOVER OVERLAY */}
                   <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
-
-                  {/* CONTENT */}
                   <div className="p-6 relative z-10">
                     <p className="text-gray-400 text-sm mb-2">
                       {new Date(b.CreatedAt).toLocaleDateString("en-US", {
@@ -481,7 +461,6 @@ const LandingPage: FC = () => {
               ))}
             </div>
 
-            {/* Show Less button */}
             {showAllBlogs && (
               <div className="text-center mt-6">
                 <button
@@ -518,8 +497,6 @@ const LandingPage: FC = () => {
                 We help clients find the best real estate investment
                 opportunities, condominiums, and properties in prime locations.
               </p>
-
-              {/* SOCIAL */}
               <div className="flex gap-4 mt-4">
                 <a href="#" className="hover:text-white transition">
                   <i className="fa fa-facebook text-lg"></i>
